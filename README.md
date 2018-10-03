@@ -1,2 +1,5 @@
 # Ventricle_Capitalists
 Code repo for all project information for 3K04 Software Design of a Pacemaker
+
+Want to add code to the repo?
+Create a new branch, put all the code on the branch and create a pull request!
