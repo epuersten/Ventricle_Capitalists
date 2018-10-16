@@ -79,12 +79,13 @@
             this.usernameBox.Name = "usernameBox";
             this.usernameBox.Size = new System.Drawing.Size(267, 20);
             this.usernameBox.TabIndex = 5;
+            this.usernameBox.TextChanged += new System.EventHandler(this.usernameBox_TextChanged);
             // 
             // registerlabel
             // 
             this.registerlabel.AutoSize = true;
             this.registerlabel.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.registerlabel.Location = new System.Drawing.Point(284, 136);
+            this.registerlabel.Location = new System.Drawing.Point(204, 136);
             this.registerlabel.Name = "registerlabel";
             this.registerlabel.Size = new System.Drawing.Size(88, 13);
             this.registerlabel.TabIndex = 6;
@@ -96,7 +97,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(384, 161);
+            this.ClientSize = new System.Drawing.Size(304, 161);
             this.Controls.Add(this.registerlabel);
             this.Controls.Add(this.usernameBox);
             this.Controls.Add(this.passwordBox);
