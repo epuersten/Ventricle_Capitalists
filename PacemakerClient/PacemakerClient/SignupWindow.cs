@@ -28,6 +28,15 @@ namespace PacemakerClient
             //Probably validate the username doesnt exist in the data file
             //Then validate the passwords are the same
             //Then create the new entry in the data file, close, and go back to the previous screen
+            this.Close();
         }
+
+        private void BackButton_Click(object sender, EventArgs e)
+        {
+            //Cancel and return to the login window
+            this.Close();
+        }
+
+        
     }
 }
