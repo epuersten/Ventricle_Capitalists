@@ -35,7 +35,7 @@
             this.SubmitButton = new System.Windows.Forms.Button();
             this.confirmPWBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.CancelButton = new System.Windows.Forms.Button();
+            this.BackButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // usernameBox
@@ -100,22 +100,23 @@
             this.label3.TabIndex = 11;
             this.label3.Text = "Confirm Password:";
             // 
-            // CancelButton
+            // BackButton
             // 
-            this.CancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.CancelButton.Location = new System.Drawing.Point(93, 164);
-            this.CancelButton.Name = "CancelButton";
-            this.CancelButton.Size = new System.Drawing.Size(75, 23);
-            this.CancelButton.TabIndex = 13;
-            this.CancelButton.Text = "Cancel";
-            this.CancelButton.UseVisualStyleBackColor = true;
+            this.BackButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.BackButton.Location = new System.Drawing.Point(93, 164);
+            this.BackButton.Name = "BackButton";
+            this.BackButton.Size = new System.Drawing.Size(75, 23);
+            this.BackButton.TabIndex = 13;
+            this.BackButton.Text = "Cancel";
+            this.BackButton.UseVisualStyleBackColor = true;
+            this.BackButton.Click += new System.EventHandler(this.BackButton_Click);
             // 
             // Signup
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(304, 211);
-            this.Controls.Add(this.CancelButton);
+            this.Controls.Add(this.BackButton);
             this.Controls.Add(this.confirmPWBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.usernameBox);
@@ -139,6 +140,6 @@
         private System.Windows.Forms.Button SubmitButton;
         private System.Windows.Forms.TextBox confirmPWBox;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button CancelButton;
+        private System.Windows.Forms.Button BackButton;
     }
 }

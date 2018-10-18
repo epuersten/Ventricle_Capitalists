@@ -26,16 +26,29 @@ namespace PacemakerClient
         private void registerlabel_Click(object sender, EventArgs e)
         {
             //Open up a new window to ask for username, password
-            //This will open Form2 (I'll rename it later) and pass the data handler object to it
+            //This will open SignupWindow and pass the data handler object to it
+            Signup signup = new Signup();
+            //We show it as a dialog so that the user can't interact with this window until it's filled out
+            signup.ShowDialog();
         }
 
         private void LoginButton_Click(object sender, EventArgs e)
         {
+            //Get username and password strings
+            String username = usernameBox.Text;
+            String password = passwordBox.Text;
             //Check if inputs are empty
+            if(usernameBox.Text.Length == 0 || passwordBox.Text.Length == 0)
+            {
+                //Show an error dialog
+
+                //Clear the fields
+                usernameBox.Text = "";
+                passwordBox.Text = "";
+            }
             //Then check if inputs are in the database already (After the data file has been opened)
-            //Then do the whole login thing.
-            //Get the text from the userBox and passwordBox text fields
             //Try and see if the user is valid first, then the password. Maybe have a table and use the user as a key, password as one of the values in it?
+            
             //If they are both valid, open up the controller/telemetry window and pass it the username.
             //Then we can use the username there as a key to access the rest of the user data inside the DataHandler.
 

@@ -79,7 +79,6 @@
             this.usernameBox.Name = "usernameBox";
             this.usernameBox.Size = new System.Drawing.Size(267, 20);
             this.usernameBox.TabIndex = 5;
-            this.usernameBox.TextChanged += new System.EventHandler(this.usernameBox_TextChanged);
             // 
             // registerlabel
             // 
