@@ -7,7 +7,7 @@
 # set limits and/or create drop downs for parameters (some are enumerations or on/off)
 # fill in more information page
 
-### TIDY UP CODE
+### TIDY UP CODE PLZ
 # implement a function that creates a label and entry box which returns the value
 
 ### MAYBE INCLUDE ???
