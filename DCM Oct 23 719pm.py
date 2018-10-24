@@ -212,13 +212,21 @@ class Home_Window(Frame):
 
         # Create label and variable entry field for Pace Rate Parameter
 
-        Label(master, text="Pace Rate (ppm)").grid(row=6, column=2, sticky=E, pady=3)
-        prates = list(range(30,51,5)) + list(range(50,91,1)) + list(range(90,176,5))
-        self.pulseRate = StringVar(master)
-        self.pulseRate.set('60') 
-        self.pr = OptionMenu(master, self.pulseRate, *prates)
-        self.pr.config(state='disabled', bg='LIGHTGRAY')
-        self.pr.grid(row = 6, column = 3, pady=3, sticky=W)
+        Label(master, text="Upper Pace Rate (ppm)").grid(row=5, column=2, sticky=E, pady=3)
+        uprates = list(range(50,176,5))
+        self.upperPulseRate = StringVar(master)
+        self.upperPulseRate.set('120') 
+        self.upr = OptionMenu(master, self.upperPulseRate, *uprates)
+        self.upr.config(state='disabled', bg='LIGHTGRAY')
+        self.upr.grid(row = 5, column = 3, pady=3, sticky=W)
+
+        Label(master, text="Lower Pace Rate (ppm)").grid(row=6, column=2, sticky=E, pady=3)
+        lprates = list(range(30,51,5)) + list(range(50,91,1)) + list(range(90,176,5))
+        self.lowerPulseRate = StringVar(master)
+        self.lowerPulseRate.set('60') 
+        self.lpr = OptionMenu(master, self.lowerPulseRate, *lprates)
+        self.lpr.config(state='disabled', bg='LIGHTGRAY')
+        self.lpr.grid(row = 6, column = 3, pady=3, sticky=W)
 
         # Create labels and variable entry fields for ventricular parameters
         Label(master, text="Ventricular Pulse Width (ms)").grid(row=5, column=5, sticky=E)
@@ -447,7 +455,8 @@ class Home_Window(Frame):
             self.__enable_savdo()
             self.savdoOn.config(state='disabled')
             
-            self.pr.config(state='disabled', bg='LIGHTGREY')
+            self.upr.config(state='disabled', bg='LIGHTGREY')
+            self.lpr.config(state='disabled', bg='LIGHTGREY')
 
             self.va.config(state='disabled', bg='LIGHTGREY')
             self.vpw.config(state='disabled', bg='LIGHTGREY')
@@ -465,7 +474,8 @@ class Home_Window(Frame):
             
         # if the mode is not off - allow user to set pulse rate
         else:
-            self.pr.config(state='normal', bg='WHITE')
+            self.lpr.config(state='normal', bg='WHITE')
+            self.upr.config(state='normal', bg='WHITE')
 
         # if the mode has rate modulation - allow user to set maximum sensor rate, activity threshold, reaction time, response time, and recovery time,
         # otherwise do not    
