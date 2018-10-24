@@ -221,7 +221,7 @@ class Home_Window(Frame):
         self.upr.grid(row = 5, column = 3, pady=3, sticky=W)
 
         Label(master, text="Lower Pace Rate (ppm)").grid(row=6, column=2, sticky=E, pady=3)
-        lprates = list(range(30,51,5)) + list(range(50,91,1)) + list(range(90,176,5))
+        lprates = list(range(30,50,5)) + list(range(50,90,1)) + list(range(90,176,5))
         self.lowerPulseRate = StringVar(master)
         self.lowerPulseRate.set('60') 
         self.lpr = OptionMenu(master, self.lowerPulseRate, *lprates)
@@ -611,9 +611,6 @@ class Home_Window(Frame):
         
         Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
         print(self.mode.get())
-
-        print(self.dynAVDelay.get())
-        print(self.atrFallbackMode.get())
         
         if self.mode.get() == "VOO":
             print("Pulse Rate: " + self.pulseRate.get() + "ppm")
