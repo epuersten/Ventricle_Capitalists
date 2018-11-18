@@ -28,7 +28,7 @@ class SerialHandler:
         for data in toSend:  #Send all data to the pacemaker
             #Convert to either single-byte or float
             try:
-                self.port.write(struct.pack("b", int(data))) 
+                self.port.write(struct.pack("b", data)) 
             except: #If conversion to int is unsuccessful, it must be a float. Try to send that instead.
                 self.port.write(struct.pack("f", float(data)))
             self.port.write("\n".encode())
