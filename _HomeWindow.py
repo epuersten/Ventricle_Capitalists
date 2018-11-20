@@ -533,7 +533,7 @@ class Home_Window(Frame):
                 Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
                 print(self.current_params)
                 try:
-                    port = SerialHandler("COM3") #Serial Port to use
+                    port = SerialHandler("COM13") #Serial Port to use
                     port.sendData(self.current_params)
                     port.close()
                 except:

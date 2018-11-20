@@ -70,7 +70,7 @@ class SerialHandler:
                 self.port.write(struct.pack("h", int(data))) 
                 #print("byte")
             except: #If conversion to int is unsuccessful, it must be a float. Try to send that instead.
-                self.port.write(struct.pack("f", float(data)))
+                self.port.write(struct.pack("d", float(data)))
                 #print("float")
         self.port.write("\n".encode()) #End off with a newline
 
