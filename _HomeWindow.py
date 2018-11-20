@@ -1,267 +1,326 @@
+# when the window is exited, print the patients parameters to a file with the name of the patient
+# when the window is entered, read from the patients file to set each of the parameters
+
+import csv
 import tkinter
 from tkinter import *
 from _LoginWindow import *
 from _EgramWindow import *
+from _SerialHandler import *
 
 #Home Window.
 
 class Home_Window(Frame):
-    def __init__(self,master):
+    def __init__(self,master,username):
         
         self.master = master
-        master.title("Pacemaker Device Control Monitor v 1.0 Home")
+        master.title("Pacemaker Device Control Monitor 2.0 Home")
+        master.config(background='white')
 
-        Label(master, text="Welcome Back!").grid(row=2, column=2)
+        self.filename = str(username) + ".txt"
 
-        Label(master, text="BASIC PARAMETERS: ").grid(row=4, column=2)
+        self.current_params = []
+        self.new_params = []
 
-        Label(master,text="ADV. PARAMETERS: ").grid(row=8,column=2)
+        self.port = SerialHandler("COM3") #Serial Port to use
+
+        Label(master, text="Parameter Selection", bg = 'white', font = 12).grid(row=1, column=1)
+
+        select_frame = Frame(master, bg = 'white')
+        select_frame.grid(row = 2, column = 1)
+
+        button_frame = Frame(master, bg = 'white')
+        button_frame.grid(row = 3, column = 1)
+
+        param_frame = Frame(select_frame, bg = 'gray92')
+        param_frame.grid(row = 2, column = 1, padx = 20, pady = 20)
+        
+        ms_frame = Frame(select_frame, bg = 'white')
+        ms_frame.grid(row = 1, column = 1)
+
+        pr_frame = Frame(param_frame, bg = 'gray92', padx=30, pady=30)
+        pr_frame.grid(row = 1, column = 1)
+
+        vent_frame = Frame(param_frame, bg = 'gray92', padx=30, pady=30)
+        vent_frame.grid(row = 1, column = 2)
+
+        atrial_frame = Frame(param_frame, bg = 'gray92', padx=30, pady=30)
+        atrial_frame.grid(row = 1, column = 3)
+
+        atr_frame = Frame(param_frame, bg = 'gray92', padx=30, pady=30)
+        atr_frame.grid(row = 1, column = 4)
+
+        delay_frame = Frame(param_frame, bg = 'gray92', padx=30)
+        delay_frame.grid(row = 2, column = 1)
+        
+        rsh_frame = Frame(param_frame, bg = 'gray92', padx=30)
+        rsh_frame.grid(row = 2, column = 2)
+
+        rp_frame = Frame(param_frame, bg = 'gray92', padx=30)
+        rp_frame.grid(row = 2, column = 3)
+
+        misc_frame = Frame(param_frame, bg = 'gray92', padx=30)
+        misc_frame.grid(row = 2, column = 4)
 
         # Create buttons to Send Parameters, Change Patients, get More Information, Start/Stop Egram Transmission
-        Button(master, text="MORE INFORMATION", command=self.__more_info).grid(row=1, column=2)
-        Button(master, text="START EGRAM TRANSMISSION", command=self.__start_egram).grid(row=1, column=5)
-        Button(master, text="SEND PARAMETERS", command=self.__send_param).grid(row=1, column=3)
-        Button(master, text="CHANGE PATIENTS", command=master.destroy).grid(row=1, column=6)
-        Button(master, text="QUIT", command = master.destroy).grid(row=1,column=9)
+        Button(button_frame, text="Information", command=self.__more_info, bg = 'royal blue', fg = 'white').grid(row=1, column=1, padx=10, pady=10)
+        Button(button_frame, text="Electrogram Viewer", command=self.__start_egram, bg = 'royal blue', fg = 'white').grid(row=1, column=2, padx=10, pady=10)
+        Button(button_frame, text="Send Parameters", command=self.__send_param, bg = 'royal blue', fg = 'white').grid(row=1, column=3, padx=10, pady=10)
+        Button(button_frame, text="Change Patients", command=self.__exit, bg = 'royal blue', fg = 'white').grid(row=1, column=4, padx=10, pady=10)
+        Button(button_frame, text="QUIT", command = self.__exit, bg = 'red', fg = 'white').grid(row=1,column=5, padx = 10, pady = 10)
 
         # Create Mode Selection
         
-        Label(master, text="Select a Mode").grid(row = 3, column = 2, pady=3, sticky=E)
+        Label(ms_frame, text="Select a Mode", bg = 'white').grid(row = 1, column = 1, pady=3, sticky=E)
         
-        modes = [ 'OFF','VOO','AOO','VVT','AAT','VVI','AAI','VDD','DOO','DDI','DDD','AOOR','AAIR','VOOR','VVIR','VDDR','DOOR','DDIR','DDDR']
+        modes = [ 'OFF','VOO','AOO','VVI','AAI','DOO','DDD','VOOR','AOOR','VVIR','AAIR','DOOR','DDDR']
+        # VVT, AAT, VDD, DDI, , DDIR and VDDR were removed as these modes are not part of any assignment
         self.mode = StringVar(master)
         self.mode.set(modes[0]) 
 
-        self.modeMenu = OptionMenu(master, self.mode, *modes, command = self.__change_mode)
-        self.modeMenu.grid(row = 3, column = 3, pady=3, sticky=W)
+        self.modeMenu = OptionMenu(ms_frame, self.mode, *modes, command = self.__change_mode)
+        self.modeMenu.config(bg = 'white')
+        self.modeMenu.grid(row = 1, column = 2, pady=3, sticky=W)
 
         # Create State Selection
 
-        Label(master, text="Select a State").grid(row = 3, column = 5, pady=3, sticky=E)
+        Label(ms_frame, text="Select a State", bg = 'white').grid(row = 1, column = 3, pady=3, sticky=E)
         
         states = ['Permanent','Temporary','Pace-Now','Magnet','Power-On Reset']
         self.state = StringVar(master)
         self.state.set(states[0]) 
  
-        self.stateMenu = OptionMenu(master, self.state, *states, command = self.__change_state)
-        self.stateMenu.grid(row = 3, column = 6, pady=3, sticky=W)
+        self.stateMenu = OptionMenu(ms_frame, self.state, *states, command = self.__change_state)
+        self.stateMenu.config(bg = 'white')
+        self.stateMenu.grid(row = 1, column = 4, pady=3, sticky=W)
 
         # Create label and variable entry field for Pace Rate Parameter
 
-        Label(master, text="Upper Pace Rate (ppm)").grid(row=5, column=2, sticky=E, pady=3)
+        Label(pr_frame, text="Upper Pace Rate (ppm)", bg = 'gray92').grid(row=5, column=2, sticky=E, pady=3)
         uprates = list(range(50,176,5))
-        self.upperPulseRate = StringVar(master)
+        self.upperPulseRate = StringVar()
         self.upperPulseRate.set('120') 
-        self.upr = OptionMenu(master, self.upperPulseRate, *uprates)
+        self.upr = OptionMenu(pr_frame, self.upperPulseRate, *uprates)
         self.upr.config(state='disabled', bg='LIGHTGRAY')
         self.upr.grid(row = 5, column = 3, pady=3, sticky=W)
 
-        Label(master, text="Lower Pace Rate (ppm)").grid(row=6, column=2, sticky=E, pady=3)
+        Label(pr_frame, text="Lower Pace Rate (ppm)", bg = 'gray92').grid(row=6, column=2, sticky=E, pady=3)
         lprates = list(range(30,50,5)) + list(range(50,90,1)) + list(range(90,176,5))
-        self.lowerPulseRate = StringVar(master)
+        self.lowerPulseRate = StringVar()
         self.lowerPulseRate.set('60') 
-        self.lpr = OptionMenu(master, self.lowerPulseRate, *lprates)
+        self.lpr = OptionMenu(pr_frame, self.lowerPulseRate, *lprates)
         self.lpr.config(state='disabled', bg='LIGHTGRAY')
         self.lpr.grid(row = 6, column = 3, pady=3, sticky=W)
 
         # Create labels and variable entry fields for ventricular parameters
-        Label(master, text="Ventricular Pulse Width (ms)").grid(row=5, column=5, sticky=E)
-        venpws = ['0.05','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0','1.1','1.2','1.3','1.4','1.5','1.6','1.7','1.8','1.9']
-        self.vPulseWidth = StringVar(master)
-        self.vPulseWidth.set(0.4) 
-        self.vpw = OptionMenu(master, self.vPulseWidth, *venpws)
+        Label(vent_frame, text="Ventricular Pulse Width (ms)", bg = 'gray92').grid(row=5, column=5, sticky=E)
+        venpws = range(10,20)
+        self.vPulseWidth = StringVar()
+        self.vPulseWidth.set(10) 
+        self.vpw = OptionMenu(vent_frame, self.vPulseWidth, *venpws)
         self.vpw.config(state='disabled', bg='LIGHTGREY')
         self.vpw.grid(row = 5, column = 6, pady=3, sticky=W)
 
-        Label(master, text="Ventricular Amplitude (V)").grid(row=6, column=5, sticky=E, pady=3)
+        Label(vent_frame, text="Ventricular Amplitude (V)", bg = 'gray92').grid(row=6, column=5, sticky=E, pady=3)
         vas = ['0.00','1.25','2.50','3.75','5.00']
-        self.vAmp = StringVar(master)
+        self.vAmp = StringVar()
         self.vAmp.set(3.75) 
-        self.va = OptionMenu(master, self.vAmp, *vas)
+        self.va = OptionMenu(vent_frame, self.vAmp, *vas)
         self.va.config(state='disabled', bg='LIGHTGREY')
         self.va.grid(row = 6, column = 6, pady=3, sticky=W)
 
-        Label(master, text="Ventricular Sensitivity (mV)").grid(row=7, column=5, sticky=E)
+        Label(vent_frame, text="Ventricular Sensitivity (mV)", bg = 'gray92').grid(row=7, column=5, sticky=E)
         vsens = ['0.25','0.5','0.75','1.0','1.5','2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0','6.5','7.0','7.5','8.0','8.5','9.0','9.5','10.0']
-        self.vSensitivity = StringVar(master)
+        self.vSensitivity = StringVar()
         self.vSensitivity.set(2.5) 
-        self.vs = OptionMenu(master, self.vSensitivity, *vsens)
+        self.vs = OptionMenu(vent_frame, self.vSensitivity, *vsens)
         self.vs.config(state='disabled', bg='LIGHTGREY')
         self.vs.grid(row = 7, column = 6, pady=3, sticky=W)
 
         # Create labels and variable entry fields for atrial parameters
-        Label(master, text="Atrial Pulse Width (ms)").grid(row=5, column=8, sticky=E, pady=3)
-        atrpws = ['0.05','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0','1.1','1.2','1.3','1.4','1.5','1.6','1.7','1.8','1.9']
-        self.aPulseWidth = StringVar(master)
-        self.aPulseWidth.set(0.4) 
-        self.apw = OptionMenu(master, self.aPulseWidth, *atrpws)
+        Label(atrial_frame, text="Atrial Pulse Width (ms)", bg = 'gray92').grid(row=5, column=8, sticky=E, pady=3)
+        atrpws = range(10,20)
+        self.aPulseWidth = StringVar()
+        self.aPulseWidth.set(10) 
+        self.apw = OptionMenu(atrial_frame, self.aPulseWidth, *atrpws)
         self.apw.config(state='disabled', bg='LIGHTGREY')
         self.apw.grid(row = 5, column = 9, pady=3, sticky=W)
 
-        Label(master, text="Atrial Amplitude (V)").grid(row=6, column=8, sticky=E)
+        Label(atrial_frame, text="Atrial Amplitude (V)", bg = 'gray92').grid(row=6, column=8, sticky=E)
         aas = ['0.00','1.25','2.50','3.75','5.00']
-        self.aAmp = StringVar(master)
+        self.aAmp = StringVar()
         self.aAmp.set(3.75) 
-        self.aa = OptionMenu(master, self.aAmp, *aas)
+        self.aa = OptionMenu(atrial_frame, self.aAmp, *aas)
         self.aa.config(state='disabled', bg='LIGHTGREY')
         self.aa.grid(row = 6, column = 9, pady=3, sticky=W)
 
-        Label(master, text="Atrial Sensitivity (mV)").grid(row=7, column=8, sticky=E)
+        Label(atrial_frame, text="Atrial Sensitivity (mV)", bg = 'gray92').grid(row=7, column=8, sticky=E)
         asens = ['0.25','0.5','0.75','1.0','1.5','2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0','6.5','7.0','7.5','8.0','8.5','9.0','9.5','10.0']
-        self.aSensitivity = StringVar(master)
+        self.aSensitivity = StringVar()
         self.aSensitivity.set(0.75) 
-        self.ase = OptionMenu(master, self.aSensitivity, *asens)
+        self.ase = OptionMenu(atrial_frame, self.aSensitivity, *asens)
         self.ase.config(state='disabled', bg='LIGHTGREY')
         self.ase.grid(row = 7, column = 9, pady=3, sticky=W)
 
         # Create labels and entry fields for ATR parameters
         self.atrOn = IntVar()
-        self.atrfm = Checkbutton(master, text="ATR Fallback Mode", variable=self.atrOn, state='disabled', command = self.__enable_atr)
+        self.atrfm = Checkbutton(atr_frame, text="ATR Fallback Mode", bg = 'gray92', variable=self.atrOn, state='disabled', command = self.__enable_atr)
         self.atrfm.grid(row=9, column=2, sticky=W)
 
-        Label(master, text="ATR Duration (cc)").grid(row=10, column=2, sticky=E)
+        Label(atr_frame, text="ATR Duration (cc)", bg = 'gray92').grid(row=10, column=2, sticky=E)
         atrdurs = [10] + list(range(20,81,20)) + list(range(100, 2001,100))
-        self.atrDuration = StringVar(master)
+        self.atrDuration = StringVar()
         self.atrDuration.set('20') 
-        self.atrd = OptionMenu(master, self.atrDuration, *atrdurs)
+        self.atrd = OptionMenu(atr_frame, self.atrDuration, *atrdurs)
         self.atrd.config(state='disabled', bg='LIGHTGREY')
         self.atrd.grid(row = 10, column = 3, pady=3, sticky=W)
 
-        Label(master, text="ATR Fallback Time (min)").grid(row=11, column=2, sticky=E)
+        Label(atr_frame, text="ATR Fallback Time (min)", bg = 'gray92').grid(row=11, column=2, sticky=E)
         ftimes = range(1,6)
-        self.atrFallbackTime = StringVar(master)
+        self.atrFallbackTime = StringVar()
         self.atrFallbackTime.set('1') 
-        self.atrft = OptionMenu(master, self.atrFallbackTime, *ftimes)
+        self.atrft = OptionMenu(atr_frame, self.atrFallbackTime, *ftimes)
         self.atrft.config(state='disabled', bg='LIGHTGREY')
         self.atrft.grid(row = 11, column = 3, pady=3, sticky=W)
 
         # Create labels and variable entry fields for Rate Smoothing and Hysteresis
         self.rateSmoothOn = IntVar()
-        self.rsOn = Checkbutton(master, text="Rate Smoothing", variable=self.rateSmoothOn, state='disabled', command = self.__enable_rs)
+        self.rsOn = Checkbutton(rsh_frame, text="Rate Smoothing", bg = 'gray92', variable=self.rateSmoothOn, state='disabled', command = self.__enable_rs)
         self.rsOn.grid(row=9, column=5, sticky=W)
 
-        Label(master, text="Rate Smoothing (%)").grid(row=10, column=5, sticky=E)
+        Label(rsh_frame, text="Rate Smoothing (%)", bg = 'gray92').grid(row=10, column=5, sticky=E)
         rsmooths = list(range(3,24,3)) + [25]
-        self.rateSmoothing = StringVar(master)
+        self.rateSmoothing = StringVar()
         self.rateSmoothing.set('3') 
-        self.rs = OptionMenu(master, self.rateSmoothing, *rsmooths)
+        self.rs = OptionMenu(rsh_frame, self.rateSmoothing, *rsmooths)
         self.rs.config(state='disabled', bg='LIGHTGREY')
         self.rs.grid(row = 10, column = 6, pady=6, sticky=W)
 
         self.hysOn = IntVar()
-        self.hOn = Checkbutton(master, text="Hysteresis", variable=self.hysOn, state='disabled', command = self.__enable_hys)
+        self.hOn = Checkbutton(rsh_frame, text="Hysteresis", bg = 'gray92', variable=self.hysOn, state='disabled', command = self.__enable_hys)
         self.hOn.grid(row=11, column=5, sticky=W)
 
-        Label(master, text="Hysteresis Rate (ppm)").grid(row=12, column=5, sticky=E)
+        Label(rsh_frame, text="Hysteresis Rate (ppm)", bg = 'gray92').grid(row=12, column=5, sticky=E)
         hysrates = list(range(30,50,5)) + list(range(50,90,1)) + list(range(90,176,5))
-        self.hys = StringVar(master)
+        self.hys = StringVar()
         self.hys.set('60') 
-        self.h = OptionMenu(master, self.hys, *hysrates)
+        self.h = OptionMenu(rsh_frame, self.hys, *hysrates)
         self.h.config(state='disabled', bg='LIGHTGREY')
         self.h.grid(row = 12, column = 6, pady=6, sticky=W)
 
         # Create labels and variable entry fields for refractory period parameters
-        Label(master, text="VRP (ms)").grid(row=9, column=8, sticky=E)
+        Label(rp_frame, text="VRP (ms)", bg = 'gray92').grid(row=9, column=8, sticky=E)
         vrpvars = range(150,501,10)
-        self.vRefractPeriod = StringVar(master)
+        self.vRefractPeriod = StringVar()
         self.vRefractPeriod.set(320) 
-        self.vrp = OptionMenu(master, self.vRefractPeriod, *vrpvars)
+        self.vrp = OptionMenu(rp_frame, self.vRefractPeriod, *vrpvars)
         self.vrp.config(state='disabled', bg='LIGHTGREY')
         self.vrp.grid(row = 9, column = 9, pady=3, sticky=W)
         
-        Label(master, text="ARP (ms)").grid(row=10, column=8, sticky=E)
+        Label(rp_frame, text="ARP (ms)", bg = 'gray92').grid(row=10, column=8, sticky=E)
         arpvars = range(150,501,10)
-        self.aRefractPeriod = StringVar(master)
+        self.aRefractPeriod = StringVar()
         self.aRefractPeriod.set(250) 
-        self.arp = OptionMenu(master, self.aRefractPeriod, *arpvars)
+        self.arp = OptionMenu(rp_frame, self.aRefractPeriod, *arpvars)
         self.arp.config(state='disabled', bg='LIGHTGREY')
         self.arp.grid(row = 10, column = 9, pady=3, sticky=W)
 
-        Label(master, text="PVARP (ms)").grid(row=11, column=8, sticky=E)
+        Label(rp_frame, text="PVARP (ms)", bg = 'gray92').grid(row=11, column=8, sticky=E)
         pvarpvars = range(150,501,10)
-        self.postVARefractPeriod = StringVar(master)
+        self.postVARefractPeriod = StringVar()
         self.postVARefractPeriod.set(250) 
-        self.pvarp = OptionMenu(master, self.postVARefractPeriod, *pvarpvars)
+        self.pvarp = OptionMenu(rp_frame, self.postVARefractPeriod, *pvarpvars)
         self.pvarp.config(state='disabled', bg='LIGHTGREY')
         self.pvarp.grid(row = 11, column = 9, pady=3, sticky=W)
 
         self.postVARPExtOn = IntVar()
-        self.pvarpeOn = Checkbutton(master, text="PVARP Extension", variable=self.postVARPExtOn, state='disabled', command = self.__enable_pvarpe)
+        self.pvarpeOn = Checkbutton(rp_frame, text="PVARP Extension", bg = 'gray92', variable=self.postVARPExtOn, state='disabled', command = self.__enable_pvarpe)
         self.pvarpeOn.grid(row=12, column=8, sticky=W)
 
-        Label(master, text="PVARP Extension (ms)").grid(row=13, column=8, sticky=E)
+        Label(rp_frame, text="PVARP Extension (ms)", bg = 'gray92').grid(row=13, column=8, sticky=E)
         pvarpevars = range(50,401,50)
-        self.postVARefractPeriodExt = StringVar(master)
+        self.postVARefractPeriodExt = StringVar()
         self.postVARefractPeriodExt.set('50') 
-        self.pvarpe = OptionMenu(master, self.postVARefractPeriodExt, *pvarpevars)
+        self.pvarpe = OptionMenu(rp_frame, self.postVARefractPeriodExt, *pvarpevars)
         self.pvarpe.config(state='disabled', bg='LIGHTGREY')
         self.pvarpe.grid(row = 13, column = 9, pady=3, sticky=W)
         
         # Create labels and variable entry fields for AV Delay Parameters
-        self.dynAVDelay = IntVar()
-        self.davd = Checkbutton(master, text="Dynamic AV Delay", variable=self.dynAVDelay, state='disabled')
-        self.davd.grid(row=14, column=5, sticky=W)
+        self.dynAVDelayOn = IntVar()
+        self.davdOn = Checkbutton(delay_frame, text="Dynamic AV Delay", bg = 'gray92', variable=self.dynAVDelayOn, state='disabled', command = self.__enable_davd)
+        self.davdOn.grid(row=14, column=5, sticky=W)
+
+        Label(delay_frame, text="Minimum Dynamic AV Delay (ms)", bg = 'gray92').grid(row=15, column=5, sticky=E)
+        davdelays = range(70,301,10)
+        self.dynAVDelay = StringVar()
+        self.dynAVDelay.set('150') 
+        self.davd = OptionMenu(delay_frame, self.dynAVDelay, *davdelays)
+        self.davd.config(state='disabled', bg='LIGHTGREY')
+        self.davd.grid(row =15, column = 6, pady=3, sticky=W)
         
-        Label(master, text="Fixed AV Delay (ms)").grid(row=15, column=5, sticky=E)
+        Label(delay_frame, text="Fixed AV Delay (ms)", bg = 'gray92').grid(row=16, column=5, sticky=E)
         favdelays = range(70,301,10)
-        self.fixedAVDelay = StringVar(master)
+        self.fixedAVDelay = StringVar()
         self.fixedAVDelay.set('150') 
-        self.favd = OptionMenu(master, self.fixedAVDelay, *favdelays)
+        self.favd = OptionMenu(delay_frame, self.fixedAVDelay, *favdelays)
         self.favd.config(state='disabled', bg='LIGHTGREY')
-        self.favd.grid(row =15, column = 6, pady=3, sticky=W)
+        self.favd.grid(row =16, column = 6, pady=3, sticky=W)
 
         self.savdOffsetOn = IntVar()
-        self.savdoOn = Checkbutton(master, text="Sensed AV Delay Offset", variable=self.savdOffsetOn, state='disabled', command = self.__enable_savdo)
-        self.savdoOn.grid(row=16, column=5, sticky=W)
+        self.savdoOn = Checkbutton(delay_frame, text="Sensed AV Delay Offset", bg = 'gray92', variable=self.savdOffsetOn, state='disabled', command = self.__enable_savdo)
+        self.savdoOn.grid(row=17, column=5, sticky=W)
 
-        Label(master, text="Sensed AV Delay Offset (ms)").grid(row=17, column=5, sticky=E)
+        Label(delay_frame, text="Sensed AV Delay Offset (ms)", bg = 'gray92').grid(row=18, column=5, sticky=E)
         savdoffsets = list(range(-10,-101,-10))
-        self.sensedAVDelayOffset = StringVar(master)
+        self.sensedAVDelayOffset = StringVar()
         self.sensedAVDelayOffset.set('-10') 
-        self.savdo = OptionMenu(master, self.sensedAVDelayOffset, *savdoffsets)
+        self.savdo = OptionMenu(delay_frame, self.sensedAVDelayOffset, *savdoffsets)
         self.savdo.config(state='disabled', bg='LIGHTGREY')
-        self.savdo.grid(row = 17, column = 6, pady=3, sticky=W)
+        self.savdo.grid(row = 18, column = 6, pady=3, sticky=W)
 
         # Create labels and variable entry fields for Maximum Sensor Rate, Activity Threshold, Reaction Time, Response Factor, and Recovery Time        
-        Label(master, text="Activity Threshold").grid(row=13, column=2, sticky=E)
+        Label(misc_frame, text="Activity Threshold", bg = 'gray92').grid(row=13, column=2, sticky=E)
         thresholds = [ 'V-Low','Low','Med-Low','Med','Med-High','High','V-High']
-        self.activityThreshold = StringVar(master)
+        self.activityThreshold = StringVar()
         self.activityThreshold.set('Med') 
-        self.at = OptionMenu(master, self.activityThreshold, *thresholds)
+        self.at = OptionMenu(misc_frame, self.activityThreshold, *thresholds)
         self.at.config(state='disabled', bg='LIGHTGREY')
         self.at.grid(row = 13, column = 3, pady=3, sticky=W)
         
-        Label(master, text="Reaction Time (sec)").grid(row=14, column=2, sticky=E)
+        Label(misc_frame, text="Reaction Time (sec)", bg = 'gray92').grid(row=14, column=2, sticky=E)
         rtimes = range(10,51,10)
-        self.reactionTime = StringVar(master)
+        self.reactionTime = StringVar()
         self.reactionTime.set('30') 
-        self.ret = OptionMenu(master, self.reactionTime, *rtimes)
+        self.ret = OptionMenu(misc_frame, self.reactionTime, *rtimes)
         self.ret.config(state='disabled', bg='LIGHTGREY')
         self.ret.grid(row = 14, column = 3, pady=3, sticky=W)
 
-        Label(master, text="Response Factor").grid(row=15, column=2, sticky=E)
+        Label(misc_frame, text="Response Factor", bg = 'gray92').grid(row=15, column=2, sticky=E)
         rfactors = range(1,17)
-        self.responseFactor = StringVar(master)
+        self.responseFactor = StringVar()
         self.responseFactor.set('8') 
-        self.rf = OptionMenu(master, self.responseFactor, *rfactors)
+        self.rf = OptionMenu(misc_frame, self.responseFactor, *rfactors)
         self.rf.config(state='disabled', bg='LIGHTGREY')
         self.rf.grid(row = 15, column = 3, pady=3, sticky=W)
 
-        Label(master, text="Recovery Time (min)").grid(row=16, column=2, sticky=E)
+        Label(misc_frame, text="Recovery Time (min)", bg = 'gray92').grid(row=16, column=2, sticky=E)
         rtimes = range(2,17)
-        self.recoveryTime = StringVar(master)
+        self.recoveryTime = StringVar()
         self.recoveryTime.set('5') 
-        self.rt = OptionMenu(master, self.recoveryTime, *rtimes)
+        self.rt = OptionMenu(misc_frame, self.recoveryTime, *rtimes)
         self.rt.config(state='disabled', bg='LIGHTGREY')
         self.rt.grid(row = 16, column = 3, pady=3, sticky=W)
 
-        Label(master, text="Maximum Sensor Rate (ppm)").grid(row=17, column=2, sticky=E)
+        Label(misc_frame, text="Maximum Sensor Rate (ppm)", bg = 'gray92').grid(row=17, column=2, sticky=E)
         msrates = range(50,176,5)
-        self.maxSensorRate = StringVar(master)
+        self.maxSensorRate = StringVar()
         self.maxSensorRate.set('120') 
-        self.msr = OptionMenu(master, self.maxSensorRate, *msrates)
+        self.msr = OptionMenu(misc_frame, self.maxSensorRate, *msrates)
         self.msr.config(state='disabled', bg='LIGHTGREY')
         self.msr.grid(row = 17, column = 3, pady=3, sticky=W)
+            
+        # call to retrieve user parameters
+        self.__retrieve_params()
 
         # Method to change the mode - parameters are LIGHTGREYed out accordingly
     def __change_mode(self,mode):
@@ -286,7 +345,11 @@ class Home_Window(Frame):
             self.pvarpeOn.config(state='disabled')
 
             self.favd.config(state='disabled', bg='LIGHTGREY')
-            self.davd.config(state='disabled')
+
+            self.davdOn.deselect()
+            self.__enable_davd()
+            self.davdOn.config(state='disabled')
+            
             self.savdoOn.deselect()
             self.__enable_savdo()
             self.savdoOn.config(state='disabled')
@@ -336,7 +399,8 @@ class Home_Window(Frame):
             # atr fallback time, pvarp extension, and dynamic av delay,otherwise do not
             if mode in {'VDD','DDD','VDDR','DDDR'}:
                 self.atrfm.config(state='normal')
-                self.davd.config(state='normal')
+                self.davdOn.config(state='normal')
+                self.__enable_davd()
                 self.pvarpeOn.config(state='normal')
             
                 # of the modes with dual tracked sensing, if the mode is dual chamber - allow user to set sensed av delay offset, otherwise do not
@@ -344,14 +408,17 @@ class Home_Window(Frame):
                     self.savdoOn.config(state='normal')
                 else:
                     self.savdoOn.deselect()
-                    self.__enable_savdo()
                     self.savdoOn.config(state='disabled')
                 
             else:
                 self.atrfm.deselect()
                 self.__enable_atr()
                 self.atrfm.config(state='disabled')
-                self.davd.config(state='disabled')
+
+                self.davdOn.deselect()
+                self.__enable_davd()
+                self.davdOn.config(state='disabled')
+            
                 self.savdoOn.deselect()
                 self.__enable_savdo()
                 self.savdoOn.config(state='disabled')
@@ -363,7 +430,12 @@ class Home_Window(Frame):
             self.atrfm.deselect()
             self.__enable_atr()
             self.atrfm.config(state='disabled')
-            self.davd.config(state='disabled')
+
+            self.davdOn.deselect()
+            self.__enable_davd()
+            self.davdOn.config(state='disabled')
+
+            
             self.savdoOn.deselect()
             self.__enable_savdo()
             self.savdoOn.config(state='disabled')
@@ -442,30 +514,61 @@ class Home_Window(Frame):
         #### Will need to incorporate additional states if necessary (at the moment, only 'Permanent' is enabled
 
         
-    # Method to send (print at the moment) the set parameters    
+    # Method to send the set parameters    
     def __send_param(self):
-
-        if (int(self.upperPulseRate.get()) < int(self.lowerPulseRate.get())):
-            Popup("Parameter Error", "Lower Pulse Rate Limit must be less than Upper Pulse Rate Limit")
-        else:
-            Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
-            print(self.mode.get())
         
-            if self.mode.get() == "VOO":
-                print("Upper Pulse Rate Limit: " + self.upperPulseRate.get() + "ppm")
-                print("Lower Pulse Rate Limit: " + self.lowerPulseRate.get() + "ppm")
-                print("Ventricular Amplitude: " + self.vAmp.get() + "V")
-                print("Ventricular Pulse Width: " + self.vPulseWidth.get() + "mV")
+        if self.__check_param(self.current_params):
+            Popup("Error", "Parameters were not changed and cannot be transmitted")
+        
+        else:
+            self.current_params = self.new_params
+            if (int(self.upperPulseRate.get()) < int(self.lowerPulseRate.get())):
+                Popup("Parameter Error", "Lower Pulse Rate Limit must be less than Upper Pulse Rate Limit")
+            else:
+                modeEnumeration = self.__encode_mode(self.current_params)
+                actThreshEnumeration = self.__encode_actThresh(self.current_params)
+                self.current_params[0] = modeEnumeration
+                self.current_params[27] = actThreshEnumeration
+                Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
+                print(self.current_params)
+                self.port.sendData(self.current_params)
+                self.port.startSerialListen(21, "BBBBBBBBfffB")
 
-            
-        #### Will need to use serial communication to send parameters to the board
-        #### Will need to write code which will send all parameters for each new mode to the board;
-        ####  at the moment VOO mode only
+
+    def __encode_mode(self,current_params):
+        modeEnum = ['OFF','VOO','AOO','VVI','AAI','DOO','DDD','VOOR','AOOR','VVIR','AAIR','DOOR','DDDR']
+        for i in range(len(modeEnum)):
+            if current_params[0] == modeEnum[i]:
+                    mode = i
+        return mode
+
+    def __encode_actThresh(self,current_params):
+        actThreshEnum = ['V-Low','Low','Med-Low','Med','Med-High','High','V-High']
+        for i in range(len(actThreshEnum)):
+            if current_params[27] == actThreshEnum[i]:
+                    actThresh = i+1
+        return actThresh
+                    
+    # Method to check if the parameters have changed since the last time they were sent
+    def __check_param(self,current_params):
+        self.new_params = [self.mode.get(), self.lowerPulseRate.get(), self.upperPulseRate.get(), self.maxSensorRate.get(), self.fixedAVDelay.get(), self.dynAVDelayOn.get(), self.dynAVDelay.get(), self.savdOffsetOn.get(), self.sensedAVDelayOffset.get(), self.vAmp.get(), self.aAmp.get(), self.vPulseWidth.get(), self.aPulseWidth.get(), self.vSensitivity.get(), self.aSensitivity.get(), self.vRefractPeriod.get(),self.aRefractPeriod.get(), self.postVARefractPeriod.get(),self.postVARPExtOn.get(),self.postVARefractPeriodExt.get(), self.hysOn.get(), self.hys.get(),self.rateSmoothOn.get(), self.rateSmoothing.get(), self.atrOn.get(), self.atrDuration.get(), self.atrFallbackTime.get(),self.activityThreshold.get(),self.reactionTime.get(),self.responseFactor.get(),self.recoveryTime.get()]
+        if len(self.new_params) != len(self.current_params):
+            return(0)
+        else:
+            for i in range(len(self.new_params)):
+                if self.new_params[i] != self.current_params[i]:
+                    return(0)
+            return(1)
 
     # Method to request more info on the parameters
     def __more_info(self):
-        Popup("Mode and Parameter Information","""Start by selecting a mode and a state
+        win = Toplevel()
+        win.wm_title("About Mode and State Selection")
+        win.config(bg = 'white')
 
+        Label(win,bg='white', text = 'Mode and State Selection').grid(row=1, column =1)
+        
+        Label(win, bg='white', justify = LEFT, text = """Start by selecting a mode and a state
             Modes:
               (1) First Character - Chambers Paced:  V = Ventricular   A = Atrial   D = Dual Chamber   O = None
               (2) Second Character - Chambers Sensed:  V = Ventricular   A = Atrial   D = Dual Chamber   O = None
@@ -479,7 +582,10 @@ class Home_Window(Frame):
                Magnet State - a state used to determine the battery status of the device (currently unavailable)
                Power-On Reset State - a state entered when the battery drops too low (currently unavailable)
 
-            Depending on the mode and state selected certain parameters will become available to set""")
+            Depending on the mode selected different parameters will become available to set""").grid(row = 2, column = 1)
+
+        Button(win, text="Okay", command=win.destroy).grid(row=3, column=1)
+
 
     # Methods to request and stop transmission of Egram data 
     def __start_egram(self):
@@ -517,3 +623,118 @@ class Home_Window(Frame):
             self.pvarpe.config(state='normal', bg='WHITE')
         else:
             self.pvarpe.config(state='disabled', bg='LIGHTGREY')
+
+    def __enable_davd(self):
+        if self.dynAVDelayOn.get():
+            self.davd.config(state='normal', bg='WHITE')
+        else:
+            self.davd.config(state='disabled', bg='LIGHTGREY')
+
+    def __retrieve_params(self):
+        try:
+            userFile = open(self.filename,"r")
+            sourceData = csv.DictReader(userFile, fieldnames=['parameter'])
+        
+            # this needs to be swapped out to transfer all the saved parameters
+            index = 0
+
+            for row in sourceData:
+                if index == 0:
+                    self.mode.set(row['parameter'])
+                    self.__change_mode(self.mode.get())
+                elif index == 1:
+                    self.lowerPulseRate.set(row['parameter'])
+                elif index == 2:
+                    self.upperPulseRate.set(row['parameter'])
+                elif index == 3:
+                    self.maxSensorRate.set(row['parameter'])
+                elif index == 4:
+                    self.fixedAVDelay.set(row['parameter'])
+                elif index == 5:
+                    self.dynAVDelayOn.set(row['parameter'])
+                elif index == 6:
+                    self.dynAVDelay.set(row['parameter'])
+                elif index == 7:
+                    self.savdOffsetOn.set(row['parameter'])
+                elif index == 8:
+                    self.sensedAVDelayOffset.set(row['parameter'])
+                elif index == 9:
+                    self.vAmp.set(row['parameter'])
+                elif index == 10:
+                    self.aAmp.set(row['parameter'])
+                elif index == 11:
+                    self.vPulseWidth.set(row['parameter'])
+                elif index == 12:
+                    self.aPulseWidth.set(row['parameter'])
+                elif index == 13:
+                    self.vSensitivity.set(row['parameter'])
+                elif index == 14:
+                    self.aSensitivity.set(row['parameter'])
+                elif index == 15:
+                      self.vRefractPeriod.set(row['parameter'])
+                elif index == 16:
+                      self.aRefractPeriod.set(row['parameter'])
+                elif index == 17:
+                      self.postVARefractPeriod.set(row['parameter'])
+                elif index == 18:
+                      self.postVARPExtOn.set(row['parameter'])
+                elif index == 19:
+                      self.postVARefractPeriodExt.set(row['parameter'])
+                elif index == 20:
+                      self.hysOn.set(row['parameter'])
+                elif index == 21:
+                      self.hys.set(row['parameter'])
+                elif index == 22:
+                      self.rateSmoothOn.set(row['parameter'])
+                elif index == 23:
+                      self.rateSmoothing.set(row['parameter'])
+                elif index == 24:
+                      self.atrOn.set(row['parameter'])
+                elif index == 25:
+                      self.atrDuration.set(row['parameter'])
+                elif index == 26:         
+                      self.atrFallbackTime.set(row['parameter'])
+                elif index == 27:
+                      self.activityThreshold.set(row['parameter'])
+                elif index == 28:
+                      self.reactionTime.set(row['parameter'])
+                elif index == 29:
+                      self.responseFactor.set(row['parameter'])
+                elif index == 30:
+                      self.recoveryTime.set(row['parameter'])
+                index=index + 1
+
+            self.__enable_hys()
+            self.__enable_atr()
+            self.__enable_rs()
+            self.__enable_savdo()
+            self.__enable_pvarpe()
+            self.__enable_davd()
+
+            
+        except: #If file does not exist, create it
+            userFile = open(self.filename, "w")
+
+        userFile.close()
+        
+
+    # on termination of the window the parameters are saved in a file with the same name as the user's username
+    def __exit(self):
+
+        userFile = open(self.filename, "w")
+        userFile.close()
+        userFile = open(self.filename, "a+")
+        sourceWriter = csv.DictWriter(userFile, fieldnames=['parameter'])
+
+        self.new_params = [self.mode.get(), self.lowerPulseRate.get(), self.upperPulseRate.get(), self.maxSensorRate.get(), self.fixedAVDelay.get(), self.dynAVDelayOn.get(), self.dynAVDelay.get(), self.savdOffsetOn.get(), self.sensedAVDelayOffset.get(), self.vAmp.get(), self.aAmp.get(), self.vPulseWidth.get(), self.aPulseWidth.get(), self.vSensitivity.get(), self.aSensitivity.get(), self.vRefractPeriod.get(),self.aRefractPeriod.get(), self.postVARefractPeriod.get(),self.postVARPExtOn.get(),self.postVARefractPeriodExt.get(), self.hysOn.get(), self.hys.get(),self.rateSmoothOn.get(), self.rateSmoothing.get(), self.atrOn.get(), self.atrDuration.get(), self.atrFallbackTime.get(),self.activityThreshold.get(),self.reactionTime.get(),self.responseFactor.get(),self.recoveryTime.get()]
+        for i in range(len(self.new_params)):
+            sourceWriter.writerow({'parameter' : str(self.new_params[i])})
+
+
+        userFile.close()
+        self.master.destroy()
+            
+    
+
+                
+              

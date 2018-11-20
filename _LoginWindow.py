@@ -1,3 +1,4 @@
+
 import csv
 import tkinter
 from tkinter import *
@@ -31,47 +32,60 @@ class Login_Window(Frame):
         #****************************************************************************************
         
         self.master = master
-        master.title("Pacemaker Device Control Monitor v 1.0")
+        master.title("Pacemaker Device Control Monitor v 2.0")
+        master.config(background='white')
 
+        Label(master, text='Pacemaker Device Control Monitor', bg = 'white', font = 12).grid(row=1,column=1)
+
+        f1 = Frame(master, bg = 'gray92', padx = 20)
+        f1.grid(row = 2, column = 1, padx = 20)
+
+        reg_frame = Frame(f1, bg = 'gray92', padx = 10, pady = 10)
+        reg_frame.grid(row=1, column=1)
+
+        login_frame = Frame(f1, bg = 'gray92', padx = 10, pady = 10)
+        login_frame.grid(row=1, column=2)
+
+        button_frame = Frame(master, bg = 'white', padx = 10, pady = 10)
+        button_frame.grid(row=3, column=1)
+        
         # *** Create Register Entry Fields (Labels, Entry, and Button)
 
-        Label(master, text="Register New User").grid(row=1, column=2)
+        Label(reg_frame, text="Register", font=5, bg = 'gray92').grid(row=1, column=2)
 
-        Label(master, text="Username").grid(row=2, column=1, sticky=E)
-        self.uname = Entry(master)
+        Label(reg_frame, text="Username", bg = 'gray92').grid(row=2, column=1, sticky=E)
+        self.uname = Entry(reg_frame, bg = 'white smoke')
         self.uname.grid(row=2, column=2)
 
-        Label(master, text="Password").grid(row=3,column=1, sticky=E)
-        self.pword = Entry(master, show="*")
+        Label(reg_frame, text="Password", bg = 'gray92').grid(row=3,column=1, sticky=E)
+        self.pword = Entry(reg_frame, show="*", bg = 'white smoke')
         self.pword.grid(row=3,column=2)
         
-        Label(master, text="Confirm Password").grid(row=4,column=1, sticky=E)
-        self.pcheck = Entry(master, show="*")
+        Label(reg_frame, text="Confirm Password", bg = 'gray92').grid(row=4,column=1, sticky=E)
+        self.pcheck = Entry(reg_frame, show="*", bg = 'white smoke')
         self.pcheck.grid(row=4,column=2)
 
-        Button(master, text="REGISTER", command = self.__add_uname_pword).grid(row=5,column=2)
+        Button(reg_frame, text="Register", command = self.__add_uname_pword, bg='royal blue', fg = 'white').grid(row=5,column=2)
 
         # *** Create Login Entry Fields (Labels, Entry, and Button)
 
-        Label(master, text="Login").grid(row=1,column=4)
+        Label(login_frame, text="Login", font=5, bg = 'gray92').grid(row=1,column=2)
 
-        Label(master, text="Username").grid(row=2,column=3, sticky=E)
-        self.un = Entry(master)
-        self.un.grid(row=2,column=4)
+        Label(login_frame, text="Username", bg = 'gray92').grid(row=2,column=1, sticky=E)
+        self.un = Entry(login_frame, bg = 'white smoke')
+        self.un.grid(row=2,column=2)
 
-        Label(master, text="Password").grid(row=3,column=3, sticky=E)
-        self.pw = Entry(master, show="*")
-        self.pw.grid(row=3,column=4)
+        Label(login_frame, text="Password", bg = 'gray92').grid(row=3,column=1, sticky=E)
+        self.pw = Entry(login_frame, show="*", bg = 'white smoke')
+        self.pw.grid(row=3,column=2)
 
-        Button(master, text="LOGIN", command = self.__check_uname_pword).grid(row=5,column=4)
+        Button(login_frame, text="Login", command = self.__check_uname_pword, bg = 'royal blue', fg = 'white').grid(row=4,column=2)
 
         # *** Create Buttons (Users, Quit, and About)
 
-        Button(master, text="USERS", command = self.__users).grid(row=10,column=2)
-
-        Button(master, text="QUIT", command = master.destroy).grid(row=10,column=3)
-
-        Button(master, text="ABOUT", command = self.__about).grid(row=10,column=4)
+        Button(button_frame, text="Users", command = self.__users, bg = 'royal blue', fg = 'white', padx = 10).grid(row=1,column=1, padx = 10, pady = 10)
+        Button(button_frame, text="About", command = self.__about, bg = 'royal blue', fg = 'white', padx = 10).grid(row=1,column=2, padx = 10, pady = 10)
+        Button(button_frame, text="QUIT", command = master.destroy, bg = 'red', fg = 'white').grid(row=1,column=3, padx = 10, pady = 10)
 
     # *** Method to register a username and password entered in the entry fields
 
@@ -114,33 +128,37 @@ class Login_Window(Frame):
     def __users(self):
         win = Toplevel()
         win.wm_title("Registered Users")
+        win.config(bg = 'white')
 
-        Label(win, text="Users:").grid(row=2, column=0)
-        Label(win, text=str(", ".join(self.unames))).grid(row=2,column=1)
-        Button(win, text="Okay", command=win.destroy).grid(row=4, column=0)
+        Label(win, text="Users:", bg = 'white').grid(row=2, column=0)
+        Label(win, bg = 'white', text=str(", ".join(self.unames))).grid(row=2,column=1)
+        Button(win, text="Okay", command=win.destroy).grid(row=4, column=1)
 
     # *** Method to return program and device information
 
     def __about(self):
         win = Toplevel()
-        win.wm_title("About Pacemaker Device Control Monitor v 1.0")
+        win.wm_title("About Pacemaker Device Control Monitor v 2.0")
+        win.config(bg = 'white')
 
-        Label(win, text="""Pacemake Device Control Monitor 1.0
+        Label(win,bg='white', text = 'Pacemake Device Control Monitor 2.0').grid(row=1, column =1)
 
-              McMaster University: Department of Computing and Software
-              Software Design 3K04 Fall 2018
-              Ventricle Capitalists (Group 7)
+        Label(win, bg = 'white', justify = LEFT, text="""
+        McMaster University: Department of Computing and Software
+        Software Design 3K04 Fall 2018
 
-              Aurora Brydon, Arthur Faron, Yansong (Kevin) Hu, \n David Lui, Michelle Monte, Erin Puersten, Daniel Su""").grid(row=2, column=0)
-        Button(win, text="Okay", command=win.destroy).grid(row=4, column=0)
+        Ventricle Capitalists (Group 7)
+        Aurora Brydon, Arthur Faron, Yansong (Kevin) Hu,
+        David Lui, Michelle Monte, Erin Puersten, Daniel Su""").grid(row=2, column=1)
+        Button(win, text="Okay", command=win.destroy).grid(row=3, column=1)
 
     # *** Popup window methods
         
     def __no_user(self):
-        Popup("User not found","User not found, please try again")
+        Popup("Error","User not found, please try again")
 
     def __wrong_password(self):
-        Popup("Password incorrect","Password incorrect, please try again")
+        Popup("Error","Password incorrect, please try again")
 
     def __successful_registration(self):
         Popup("Registration Successful","Successfully registered")
@@ -158,5 +176,7 @@ class Login_Window(Frame):
         Popup("Error","An account already exists under this username")
 
     def __successful_login(self):
+        username = self.un.get()
         self.homeWindow = Toplevel(self.master)
-        self.loginWindow = Home_Window(self.homeWindow)
+        self.loginWindow = Home_Window(self.homeWindow, username)
+        #Home_Window.username = self.un.get()

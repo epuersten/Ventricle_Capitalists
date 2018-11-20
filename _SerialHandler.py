@@ -15,30 +15,37 @@ class serialReadThread(threading.Thread):
     #The reading thread
     def run(self):
         pos = 0; #Position in the read byte array
+        orderPos = 0 #Position in the input order
         output = []
-        dataIn = []
+        dataIn = b''
 
         #first try to read in the data. Read as many bytes as were specified
         while(len(dataIn) < self.numInputs):
-            dataIn = self.port.read(self.numInputs)
+            dataIn += (self.port.read())
+            #print("RECIEVED")
 
-        
+        print(dataIn)
+
+        #if(True):
         try:#In case the caller puts the wrong data input
             #Then depack it one packet at a time
             while pos < self.numInputs:
-                if(self.inputOrder[pos] == 'b'): #If we have a byte packet, treat as one byte and store
-                    output += (struct.unpack(self.inputOrder[pos], dataIn[pos:pos+1]))
+                if(self.inputOrder[orderPos] == 'B'): #If we have a byte packet, treat as one byte and store
+                    output += (struct.unpack(self.inputOrder[orderPos], dataIn[pos:pos+1]))
                     pos += 1 #Advance to next position
-                elif (self.inputOrder[pos] == 'f'): #If we have a float packet, read in the next 4 bytes and store
-                    output += (struct.unpack(self.inputOrder[pos], dataIn[pos:pos+4]))
+                elif (self.inputOrder[orderPos] == 'f'): #If we have a float packet, read in the next 4 bytes and store
+                    output += (struct.unpack(self.inputOrder[orderPos], dataIn[pos:pos+4]))
                     pos += 4 #ditto
-                print(output)
+                #print(output)
+                orderPos = orderPos + 1
 
                 #If we're not outputting to the EGram window, write to console
             if(self.targetWindow == 0):
                 print(output)
         except:
             print("Improper layout/number of bytes provided!")
+        
+        self.port.flush()
 
 class SerialHandler:
 
@@ -60,10 +67,12 @@ class SerialHandler:
         for data in toSend:  #Send all data to the pacemaker
             #Convert to either single-byte or float
             try:
-                self.port.write(struct.pack("b", data)) 
+                self.port.write(struct.pack("B", int(data))) 
+                #print("byte")
             except: #If conversion to int is unsuccessful, it must be a float. Try to send that instead.
                 self.port.write(struct.pack("f", float(data)))
-            self.port.write("\n".encode())
+                #print("float")
+        self.port.write("\n".encode()) #End off with a newline
 
     #Stops the polling thread from listening to the port
     def stopSerialListen(self):
