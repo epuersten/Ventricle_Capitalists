@@ -22,7 +22,7 @@ class Home_Window(Frame):
         self.current_params = []
         self.new_params = []
 
-        self.port = SerialHandler("COM3") #Serial Port to use
+       
 
         Label(master, text="Parameter Selection", bg = 'white', font = 12).grid(row=1, column=1)
 
@@ -525,13 +525,19 @@ class Home_Window(Frame):
             if (int(self.upperPulseRate.get()) < int(self.lowerPulseRate.get())):
                 Popup("Parameter Error", "Lower Pulse Rate Limit must be less than Upper Pulse Rate Limit")
             else:
+                
                 modeEnumeration = self.__encode_mode(self.current_params)
                 actThreshEnumeration = self.__encode_actThresh(self.current_params)
                 self.current_params[0] = modeEnumeration
                 self.current_params[27] = actThreshEnumeration
                 Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
                 print(self.current_params)
-                self.port.sendData(self.current_params)
+                try:
+                    port = SerialHandler("COM3") #Serial Port to use
+                    port.sendData(self.current_params)
+                    port.close()
+                except:
+                    print("Port not available!")
                 #Echo Code - for testing
                 #h = int16 (2 bytes), f = floating point (4 bytes)
                 #self.port.startSerialListen(26, "hhhhhhhhhff")

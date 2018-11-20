@@ -105,4 +105,7 @@ class SerialHandler:
         
         #Then starts reading thread
         self.serialThread.start()
-    
+
+    #Close the serial port
+    def close(self):
+        self.port.close()
