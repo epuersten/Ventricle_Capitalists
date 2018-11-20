@@ -532,7 +532,9 @@ class Home_Window(Frame):
                 Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
                 print(self.current_params)
                 self.port.sendData(self.current_params)
-                self.port.startSerialListen(21, "BBBBBBBBfffB")
+                #Echo Code - for testing
+                #h = int16 (2 bytes), f = floating point (4 bytes)
+                #self.port.startSerialListen(26, "hhhhhhhhhff")
 
 
     def __encode_mode(self,current_params):

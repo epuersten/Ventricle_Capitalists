@@ -30,9 +30,9 @@ class serialReadThread(threading.Thread):
         try:#In case the caller puts the wrong data input
             #Then depack it one packet at a time
             while pos < self.numInputs:
-                if(self.inputOrder[orderPos] == 'B'): #If we have a byte packet, treat as one byte and store
-                    output += (struct.unpack(self.inputOrder[orderPos], dataIn[pos:pos+1]))
-                    pos += 1 #Advance to next position
+                if(self.inputOrder[orderPos] == 'h'): #If we have a byte packet, treat as one byte and store
+                    output += (struct.unpack(self.inputOrder[orderPos], dataIn[pos:pos+2]))
+                    pos += 2 #Advance to next position
                 elif (self.inputOrder[orderPos] == 'f'): #If we have a float packet, read in the next 4 bytes and store
                     output += (struct.unpack(self.inputOrder[orderPos], dataIn[pos:pos+4]))
                     pos += 4 #ditto
@@ -65,9 +65,9 @@ class SerialHandler:
             time.sleep(2)
 
         for data in toSend:  #Send all data to the pacemaker
-            #Convert to either single-byte or float
+            #Convert to either uint16 or float
             try:
-                self.port.write(struct.pack("B", int(data))) 
+                self.port.write(struct.pack("h", int(data))) 
                 #print("byte")
             except: #If conversion to int is unsuccessful, it must be a float. Try to send that instead.
                 self.port.write(struct.pack("f", float(data)))
