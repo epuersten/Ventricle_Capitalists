@@ -1,6 +1,10 @@
 # Ventricle_Capitalists
 Code repository for all project information relating to 3K04 Software Design (Pacemaker)
 
-Want to add code to the repo?
+Required python modules to run:
+matplotlib
+pySerial
 
-Create a new branch, put all the code on the branch and create a pull request!
+These can be installed by running in command prompt
+python -m pip install matplotlib
+python -m pip install pySerial
