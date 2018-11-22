@@ -4,6 +4,7 @@ from tkinter import *
 from _LoginWindow import *
 from _EgramWindow import *
 from _SerialHandler import *
+import serial.tools.list_ports as port_list
 
 #Home Window.
 
@@ -19,7 +20,10 @@ class Home_Window(Frame):
         self.current_params = []
         self.new_params = []
 
-       
+        self.lastConnectedId = None
+        self.portID = None
+
+        self.serPort = None
 
         Label(master, text="Parameter Selection", bg = 'white', font = 12).grid(row=1, column=1)
 
@@ -66,30 +70,45 @@ class Home_Window(Frame):
         Button(button_frame, text="Change Patients", command=self.__exit, bg = 'royal blue', fg = 'white').grid(row=1, column=4, padx=10, pady=10)
         Button(button_frame, text="QUIT", command = self.__exit, bg = 'red', fg = 'white').grid(row=1,column=5, padx = 10, pady = 10)
 
+        # Create COMM Port Selection
+
+        Label(ms_frame, text="Select a Port", bg='white').grid(row=1, column=1, pady=3, sticky=E)
+
+
+        ports = ["Select"]
+
+        self.port = StringVar(master)
+        self.port.set(ports[0])
+
+        self.portMenu = OptionMenu(ms_frame, self.port, *ports)
+        self.portMenu.bind('<Button-1>', self.__refresh_ports)
+        self.portMenu.config(bg='white')
+        self.portMenu.grid(row=1, column=2, pady=3, padx=10, sticky=W)
+
         # Create Mode Selection
-        
-        Label(ms_frame, text="Select a Mode", bg = 'white').grid(row = 1, column = 1, pady=3, sticky=E)
-        
-        modes = [ 'OFF','VOO','AOO','VVI','AAI','DOO','DDD','VOOR','AOOR','VVIR','AAIR','DOOR','DDDR']
+
+        Label(ms_frame, text="Select a Mode", bg='white').grid(row=1, column=3, pady=3, sticky=E)
+
+        modes = ['OFF', 'VOO', 'AOO', 'VVI', 'AAI', 'DOO', 'DDD', 'VOOR', 'AOOR', 'VVIR', 'AAIR', 'DOOR', 'DDDR']
         # VVT, AAT, VDD, DDI, , DDIR and VDDR were removed as these modes are not part of any assignment
         self.mode = StringVar(master)
-        self.mode.set(modes[0]) 
+        self.mode.set(modes[0])
 
-        self.modeMenu = OptionMenu(ms_frame, self.mode, *modes, command = self.__change_mode)
-        self.modeMenu.config(bg = 'white')
-        self.modeMenu.grid(row = 1, column = 2, pady=3, sticky=W)
+        self.modeMenu = OptionMenu(ms_frame, self.mode, *modes)
+        self.modeMenu.config(bg='white')
+        self.modeMenu.grid(row=1, column=4, pady=3, padx=10, sticky=W)
 
         # Create State Selection
 
-        Label(ms_frame, text="Select a State", bg = 'white').grid(row = 1, column = 3, pady=3, sticky=E)
-        
-        states = ['Permanent','Temporary','Pace-Now','Magnet','Power-On Reset']
+        Label(ms_frame, text="Select a State", bg='white').grid(row=1, column=5, pady=3, sticky=E)
+
+        states = ['Permanent', 'Temporary', 'Pace-Now', 'Magnet', 'Power-On Reset']
         self.state = StringVar(master)
-        self.state.set(states[0]) 
- 
-        self.stateMenu = OptionMenu(ms_frame, self.state, *states, command = self.__change_state)
-        self.stateMenu.config(bg = 'white')
-        self.stateMenu.grid(row = 1, column = 4, pady=3, sticky=W)
+        self.state.set(states[0])
+
+        self.stateMenu = OptionMenu(ms_frame, self.state, *states, command=self.__change_state)
+        self.stateMenu.config(bg='white')
+        self.stateMenu.grid(row=1, column=6, pady=3, padx=10, sticky=W)
 
         # Create label and variable entry field for Pace Rate Parameter
 
@@ -527,10 +546,9 @@ class Home_Window(Frame):
                 self.current_params[0] = modeEnumeration
                 self.current_params[14] = actThreshEnumeration
                 Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
+                self.__check_new_pacemaker()
                 try:
-                    port = SerialHandler("COM3") #Serial Port to use
-                    port.sendData(self.current_params)
-                    port.close()
+                    self.serPort.sendData(self.current_params)
                 except:
                     print("Port not available!")
                 #Echo Code - for testing
@@ -592,8 +610,12 @@ class Home_Window(Frame):
 
     # Methods to request and stop transmission of Egram data 
     def __start_egram(self):
-        self.egramWindow = Toplevel(self.master)
-        self.loginWindow = Egram_Window(self.egramWindow)
+        self.__check_new_pacemaker()
+        try:
+            self.egramWindow = Toplevel(self.master)
+            self.loginWindow = Egram_Window(self.egramWindow, self.serPort)
+        except:
+            print("NO SERIAL PORTS AVAILABLE")
 
     def __enable_hys(self):
         if self.hysOn.get():
@@ -719,9 +741,57 @@ class Home_Window(Frame):
             userFile = open(self.filename, "w")
 
         userFile.close()
-        
 
-    # on termination of the window the parameters are saved in a file with the same name as the user's username
+    def __refresh_ports(self, source):
+
+        # Detect available serial ports
+        serPorts = list(port_list.comports())
+        ports = []
+
+        # Store available serial ports in array
+        for p in serPorts:
+            ports.append([p.device, p.serial_number])
+            print([p.device, p.serial_number])
+
+        print(ports)
+
+        # Error trapping in case no serial ports are available
+        if (len(ports) == 0):
+            ports = [["N/A", None]]
+
+
+
+        self.port.set('')
+        self.portMenu['menu'].delete(0, 'end')
+        for p in ports:
+            self.portMenu['menu'].add_command(label=p[0], command=self.__update_selected(p))
+
+    #Update the selected serial port
+    def __update_selected(self, portData):
+        print(portData)
+        self.port.set(portData[0])
+        self.portID = portData[1]
+        tkinter._setit(self.port, portData[0])
+
+        #Re-open the port
+        try:
+            self.serPort.stopSerialListen()
+            self.serPort.close()
+        except:
+            self.serPort = None
+
+        try:
+            self.serPort = SerialHandler(portData[0])
+        except:
+            print("Failed to open port!")
+
+    def __check_new_pacemaker(self):
+        if(self.lastConnectedId==None):
+            self.lastConnectedId = self.portID
+        elif(self.lastConnectedId != self.lastConnectedId):
+            print("WARNING: NEW PACEMAKER DETECTED")
+
+    # on termination of the window  the parameters are saved in a file with the same name as the user's username
     def __exit(self):
 
         userFile = open(self.filename, "w")

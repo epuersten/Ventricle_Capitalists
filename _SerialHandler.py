@@ -21,7 +21,6 @@ class serialReadThread(threading.Thread):
         self.numInputs = number
         self.inputOrder = order
         self.port = port
-        self.targetWindow = targetWindow
         self.callback = callback
 
     #The reading thread
@@ -48,18 +47,18 @@ class serialReadThread(threading.Thread):
                 elif (self.inputOrder[orderPos] == 'f'): #If we have a float packet, read in the next 4 bytes and store
                     output += (struct.unpack(self.inputOrder[orderPos], dataIn[pos:pos+4]))
                     pos += 4 #ditto
-                #print(output)
                 orderPos = orderPos + 1
 
                 #If we're not outputting to the EGram window, write to console
             if(self.callback == None):
                 print(output)
             else:
-                callback(output)
+                print(output)
+                self.callback(output)
         except:
             print("Improper layout/number of bytes provided!")
         
-        self.port.flush()
+        self.port.reset_input_buffer()
 
 class SerialHandler:
 
@@ -106,8 +105,7 @@ class SerialHandler:
         #Update local instances of these values
         self.inputOrder = order
         self.numInputs = numPoints
-        self.targetWindow = target
-        self.serialThread = serialReadThread(numPoints, order, self.port, target)
+        self.serialThread = serialReadThread(numPoints, order, self.port, callback)
 
         #Starts serial if not already started
         if (self.port.isOpen() == False):
