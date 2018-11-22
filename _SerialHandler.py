@@ -3,14 +3,26 @@ import threading
 import struct
 import time
 
+
+
+#To handle ECG input we can do things in two ways
+# >Ping the pacemaker and ask for input
+# >Continuously receive data from the pacemaker
+# The pacemaker will send data back as floats.
+
 #Thread that handles non-blocking reading fro mthe serial port
 class serialReadThread(threading.Thread):
-    def __init__ (self, number, order, port, targetWindow = None):
+    #TODO: Add a callback function parameter
+    #The callback function is passed the data received from the thread
+    #Then, the function in EGram window should update the screen based on 
+    #What data is collected from the thread
+    def __init__ (self, number, order, port, callback = None):
         threading.Thread.__init__(self)
         self.numInputs = number
         self.inputOrder = order
         self.port = port
         self.targetWindow = targetWindow
+        self.callback = callback
 
     #The reading thread
     def run(self):
@@ -40,8 +52,10 @@ class serialReadThread(threading.Thread):
                 orderPos = orderPos + 1
 
                 #If we're not outputting to the EGram window, write to console
-            if(self.targetWindow == 0):
+            if(self.callback == None):
                 print(output)
+            else:
+                callback(output)
         except:
             print("Improper layout/number of bytes provided!")
         
@@ -62,16 +76,16 @@ class SerialHandler:
     def sendData(self, toSend): 
         if(self.port.isOpen() == False):   
             self.port.open()     #Open serial port only when transmitting
-            time.sleep(2)
 
         for data in toSend:  #Send all data to the pacemaker
-            #Convert to either uint16 or float
+            #Convert to either int16 or float
             try:
-                self.port.write(struct.pack("h", int(data))) 
-                #print("byte")
+                self.port.write(struct.pack("<h", int(data))) 
+                print("short")
+                print(struct.pack("<h", int(data)))
             except: #If conversion to int is unsuccessful, it must be a float. Try to send that instead.
-                self.port.write(struct.pack("d", float(data)))
-                #print("float")
+                self.port.write(struct.pack("<d", float(data)))
+                print("float")
         self.port.write("\n".encode()) #End off with a newline
 
     #Stops the polling thread from listening to the port
@@ -88,7 +102,7 @@ class SerialHandler:
     #'dissect' the input to return an output collection
     #Target is the ECG windows to supply the target too, but that can be left blank to get
     #raw console output.
-    def startSerialListen(self, numPoints, order, target=0):
+    def startSerialListen(self, numPoints, order, callback):
         #Update local instances of these values
         self.inputOrder = order
         self.numInputs = numPoints
