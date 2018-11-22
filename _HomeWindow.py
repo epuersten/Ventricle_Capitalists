@@ -94,7 +94,7 @@ class Home_Window(Frame):
         self.mode = StringVar(master)
         self.mode.set(modes[0])
 
-        self.modeMenu = OptionMenu(ms_frame, self.mode, *modes)
+        self.modeMenu = OptionMenu(ms_frame, self.mode, *modes, command=self.__change_mode)
         self.modeMenu.config(bg='white')
         self.modeMenu.grid(row=1, column=4, pady=3, padx=10, sticky=W)
 
