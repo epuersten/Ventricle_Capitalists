@@ -32,7 +32,12 @@ class serialReadThread(threading.Thread):
 
         #first try to read in the data. Read as many bytes as were specified
         while(len(dataIn) < self.numInputs):
-            dataIn += (self.port.read())
+            try:
+                dataIn += (self.port.read())
+            #RETURN NONE IF THE SERIAL BREAKS
+            except serial.SerialException:
+                self.callback(None)
+                return
             #print("RECIEVED")
 
         print(dataIn)
@@ -83,16 +88,16 @@ class SerialHandler:
                 print("short")
                 print(struct.pack("<h", int(data)))
             except: #If conversion to int is unsuccessful, it must be a float. Try to send that instead.
-                self.port.write(struct.pack("<d", float(data)))
+                self.port.write(struct.pack("<f", float(data)))
                 print("float")
-        self.port.write("\n".encode()) #End off with a newline
+        #self.port.write("\n".encode()) #End off with a newline
 
     #Stops the polling thread from listening to the port
     def stopSerialListen(self):
         if(self.polling == True):
             self.polling = False
             self.serialThread.join()
-            self.port.close()
+            #self.port.close()
         
     #Starts the serial thread that continuously reads in sensor data from the pacemaker
     #numPoints is the total amount of bytes to read in
@@ -117,6 +122,14 @@ class SerialHandler:
         
         #Then starts reading thread
         self.serialThread.start()
+
+    #Reconnection method. To be used in the event that a device is disconnected...
+    #def reconnect(self):
+    #    curPort = self.port.name
+    #    self.port.close()
+    #    self.port = None
+    #    self.port = serial.Serial(curPort, 9600, timeout=1) #Close and re-open the port
+    #    self.port.open()
 
     #Close the serial port
     def close(self):

@@ -79,6 +79,7 @@ class Home_Window(Frame):
 
         self.port = StringVar(master)
         self.port.set(ports[0])
+        self.port.trace_add('write', self.__update_selected)
 
         self.portMenu = OptionMenu(ms_frame, self.port, *ports)
         self.portMenu.bind('<Button-1>', self.__refresh_ports)
@@ -540,17 +541,15 @@ class Home_Window(Frame):
             if (int(self.upperPulseRate.get()) < int(self.lowerPulseRate.get())):
                 Popup("Parameter Error", "Lower Pulse Rate Limit must be less than Upper Pulse Rate Limit")
             else:
-                
-                modeEnumeration = self.__encode_mode(self.current_params)
-                actThreshEnumeration = self.__encode_actThresh(self.current_params)
-                self.current_params[0] = modeEnumeration
-                self.current_params[14] = actThreshEnumeration
-                Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
-                self.__check_new_pacemaker()
-                try:
+                if (self.__check_new_pacemaker()):
+                    modeEnumeration = self.__encode_mode(self.current_params)
+                    actThreshEnumeration = self.__encode_actThresh(self.current_params)
+                    self.current_params[0] = modeEnumeration
+                    self.current_params[14] = actThreshEnumeration
+                    Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
                     self.serPort.sendData(self.current_params)
-                except:
-                    print("Port not available!")
+                else:
+                    Popup("Serial Error", "Pacemaker not available or invalid!")
                 #Echo Code - for testing
                 #h = int16 (2 bytes), f = floating point (4 bytes)
                 #self.port.startSerialListen(26, "hhhhhhhhhff")
@@ -610,12 +609,11 @@ class Home_Window(Frame):
 
     # Methods to request and stop transmission of Egram data 
     def __start_egram(self):
-        self.__check_new_pacemaker()
-        try:
+        if(self.__check_new_pacemaker()):
             self.egramWindow = Toplevel(self.master)
             self.loginWindow = Egram_Window(self.egramWindow, self.serPort)
-        except:
-            print("NO SERIAL PORTS AVAILABLE")
+        else:
+            Popup("Serial Error", "Pacemaker not connected or invalid!")
 
     def __enable_hys(self):
         if self.hysOn.get():
@@ -750,28 +748,42 @@ class Home_Window(Frame):
 
         # Store available serial ports in array
         for p in serPorts:
-            ports.append([p.device, p.serial_number])
-            print([p.device, p.serial_number])
-
-        print(ports)
+            #Check that we have a valid pacemaker by querying manufacturer
+            if(True):
+            #if(p.manufacturer == "SEGGER"):
+                ports.append(p.device)
 
         # Error trapping in case no serial ports are available
         if (len(ports) == 0):
-            ports = [["N/A", None]]
+            ports = ["N/A"]
 
 
 
         self.port.set('')
         self.portMenu['menu'].delete(0, 'end')
         for p in ports:
-            self.portMenu['menu'].add_command(label=p[0], command=self.__update_selected(p))
+            self.portMenu['menu'].add_command(label=p, command=tkinter._setit(self.port,p))
 
     #Update the selected serial port
-    def __update_selected(self, portData):
-        print(portData)
-        self.port.set(portData[0])
-        self.portID = portData[1]
-        tkinter._setit(self.port, portData[0])
+    def __update_selected(self, *args):
+        serPorts = list(port_list.comports())
+
+        if(len(serPorts) == 0):
+            self.portID = None
+            self.serPort = None
+            return
+
+        #Find the port we're using
+        selPort = None
+        for p in serPorts:
+            if p.device == self.port.get():
+                selPort = p
+
+        #Set port ID
+        if (selPort is not None):
+            self.portID = selPort.serial_number
+        else:
+            self.portID = None
 
         #Re-open the port
         try:
@@ -780,16 +792,25 @@ class Home_Window(Frame):
         except:
             self.serPort = None
 
+        if(self.port is None or self.port.get() == ''):
+            return
+
         try:
-            self.serPort = SerialHandler(portData[0])
+            self.serPort = SerialHandler(self.port.get())
         except:
-            print("Failed to open port!")
+            print(self.serPort)
+            print(self.port.get())
 
     def __check_new_pacemaker(self):
-        if(self.lastConnectedId==None):
+        if (self.portID is None or self.portID == ''):
+            return False
+
+        if(self.lastConnectedId is None):
             self.lastConnectedId = self.portID
-        elif(self.lastConnectedId != self.lastConnectedId):
-            print("WARNING: NEW PACEMAKER DETECTED")
+        elif(self.portID != self.lastConnectedId):
+            Popup("Alert", "New Pacemaker Detected!")
+            self.lastConnectedId = self.portID
+        return True
 
     # on termination of the window  the parameters are saved in a file with the same name as the user's username
     def __exit(self):

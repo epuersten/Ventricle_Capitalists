@@ -115,6 +115,10 @@ class Egram_Window(Frame):
             self.master.after_cancel(self.cont_id)
         else:
             self.liveFeed = True
+            #try:
+            #    self.serPort.reconnect()
+            #except:
+            #    Popup("Error", "Pacemaker not connected!")
             self.__live_feed_serial() 
             
     def __live_feed(self):
@@ -146,22 +150,30 @@ class Egram_Window(Frame):
 
             self.__reset_feed()
 
+
             self.serPort.startSerialListen(8, "ff", self.__serial_callback)
             #self.serPort.stopSerialListen()
 
-            #So on the X-axis we have time (test of 10 seconds)
-            #Y-axis we have the reading
-            self.vData.get() #Pop oldest entry from the queue
-            self.vData.put(self.serData[0]) #Put in the new data
+            #Check serial data
+            #If none, then we must have encountered an error
+            if(self.serData is None):
+                self.liveFeed = False
+                self.serPort.stopSerialListen()
+                Popup("Telemetry Error", "Board Telemetry Lost!")
+            else:
+                #So on the X-axis we have time (test of 10 seconds)
+                #Y-axis we have the reading
+                self.vData.get() #Pop oldest entry from the queue
+                self.vData.put(self.serData[0]) #Put in the new data
 
-            self.aData.get() #Ditto
-            self.aData.put(self.serData[1])
-            
-            self.vent.plot(range(10), self.vData.queue, marker=',', color='blue')
+                self.aData.get() #Ditto
+                self.aData.put(self.serData[1])
 
-            self.atr.plot(range(10), self.aData.queue, marker=',', color='blue')
+                self.vent.plot(range(10), self.vData.queue, marker=',', color='blue')
 
-            self.graph.draw()
+                self.atr.plot(range(10), self.aData.queue, marker=',', color='blue')
+
+                self.graph.draw()
 
         self.cont_id = self.master.after(100, self.__live_feed_serial)
 
