@@ -4,7 +4,6 @@ import struct
 import time
 
 #Always keep this line in - adjust to your COM port
-<<<<<<< HEAD
 port = SerialHandler("COM13")
 
 #Comment this line if you are sending Data
@@ -37,15 +36,13 @@ port.stopSerialListen()
 #         port.reset_input_buffer()
 #
 # port.close()
-=======
 port = SerialHandler("COM3")
 
 #Comment this line if you are sending Data
-port.startSerialListen(4, 'hh', print) # f = float, h = int16, 4 = # of bytes
+#port.startSerialListen(4, 'hh', print) # f = float, h = int16, 4 = # of bytes
 
 #Comment these lines if you are receiving Data
 #port.sendData([22, 42])
 #time.sleep(2)
 #port.sendData([22, 41])
 
->>>>>>> 5b0fd37567a56842fbfbaa534d5410da5775a84e

@@ -14,9 +14,6 @@ class Egram_Window(Frame):
     def __init__(self,master, port):
        
         self.liveFeed = False
-
-
-        
         self.master = master
         master.title("Electrogram Viewer")
         
@@ -65,10 +62,6 @@ class Egram_Window(Frame):
             self.serPort.stopSerialListen()
         else:
             self.liveFeed = True
-            #try:
-            #    self.serPort.reconnect()
-            #except:
-            #    Popup("Error", "Pacemaker not connected!")
             self.serPort.startSerialListen(8, 'ff', self.__serial_callback)
             self.__live_feed_serial()
 
@@ -78,13 +71,8 @@ class Egram_Window(Frame):
         if self.liveFeed:
 
             self.__reset_feed()
-
-
-
             self.vent.plot(range(100), self.vData.queue, marker=',', color='blue')
-
             self.atr.plot(range(100), self.aData.queue, marker=',', color='blue')
-
             self.graph.draw()
 
         self.cont_id = self.master.after(100, self.__live_feed_serial)

@@ -2,8 +2,6 @@
 import csv
 import tkinter
 from tkinter import *
-from _PopupWindow import *
-from _PopupWindow import *
 from _HomeWindow import *
 
 #************************ LOGIN WINDOW ***************************

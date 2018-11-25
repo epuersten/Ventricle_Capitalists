@@ -21,12 +21,9 @@ class serialReadThread(threading.Thread):
 
     #The polling thread
     def run(self):
-        runs = 0
         self.port.reset_input_buffer()
         while self.running:
-            runs = runs + 1
             self.__serialRead()
-        print(runs)
 
 
 

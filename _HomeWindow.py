@@ -549,7 +549,7 @@ class Home_Window(Frame):
                     Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
                     self.serPort.sendData(self.current_params)
                 else:
-                    Popup("Serial Error", "Pacemaker not available or invalid!")
+                    Popup("Serial Error", "Pacemaker not available!")
                 #Echo Code - for testing
                 #h = int16 (2 bytes), f = floating point (4 bytes)
                 #self.port.startSerialListen(26, "hhhhhhhhhff")
@@ -828,6 +828,11 @@ class Home_Window(Frame):
         self.master.destroy()
             
     
+def Popup(popup_title,popup_description):
+    win = Toplevel()
+    win.wm_title(popup_title)
 
+    Label(win, text=popup_description).grid(row=2, column=0)
+    Button(win, text="Okay", command=win.destroy).grid(row=3, column=0)
                 
               
