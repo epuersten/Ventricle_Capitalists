@@ -30,7 +30,6 @@ class Egram_Window(Frame):
 
         #ADDED THESE!!!!!!
         self.serPort = port #Serial port for input...
-        self.serData = [0,0]
         
         self.__reset_feed()
         

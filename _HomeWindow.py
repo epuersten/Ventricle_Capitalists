@@ -542,10 +542,8 @@ class Home_Window(Frame):
                 Popup("Parameter Error", "Lower Pulse Rate Limit must be less than Upper Pulse Rate Limit")
             else:
                 if (self.__check_new_pacemaker()):
-                    modeEnumeration = self.__encode_mode(self.current_params)
-                    actThreshEnumeration = self.__encode_actThresh(self.current_params)
-                    self.current_params[0] = modeEnumeration
-                    self.current_params[14] = actThreshEnumeration
+                    self.current_params[0] = self.__encode_mode(self.current_params)
+                    self.current_params[14] = self.__encode_actThresh(self.current_params)
                     Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
                     self.serPort.sendData(self.current_params)
                 else:
@@ -798,8 +796,8 @@ class Home_Window(Frame):
         try:
             self.serPort = SerialHandler(self.port.get())
         except:
-            print(self.serPort)
-            print(self.port.get())
+            Popup("Error", "Failed to connect to serial port!")
+            self.serPort = None
 
     def __check_new_pacemaker(self):
         if (self.portID is None or self.portID == ''):

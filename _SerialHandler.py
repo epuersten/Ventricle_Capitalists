@@ -1,7 +1,6 @@
 import serial
 import threading
 import struct
-import time
 
 
 #Thread that handles non-blocking polling from the serial port
@@ -77,8 +76,6 @@ class serialReadThread(threading.Thread):
         except:
             print("Improper layout/number of bytes provided!")
 
-        #self.port.reset_input_buffer()
-
 class SerialHandler:
 
     #Constructor that creates the COM port with a specified address
@@ -124,7 +121,6 @@ class SerialHandler:
         #Starts serial if not already started
         if (self.port.isOpen() == False):
             self.port.open()
-            time.sleep(2)
 
         #Notify that we are polling
         self.polling = True

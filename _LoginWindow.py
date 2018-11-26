@@ -174,7 +174,6 @@ class Login_Window(Frame):
         Popup("Error","An account already exists under this username")
 
     def __successful_login(self):
-        username = self.un.get()
         self.homeWindow = Toplevel(self.master)
-        self.loginWindow = Home_Window(self.homeWindow, username)
+        self.loginWindow = Home_Window(self.homeWindow, self.un.get())
         #Home_Window.username = self.un.get()
