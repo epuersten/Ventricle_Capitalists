@@ -65,7 +65,7 @@ class Egram_Window(Frame):
             #FIRST PARAMETER = NUMBER OF BYTES TO COLLECT. FOR BUFFER SIZE 100, WE RECEIVE 200 FLOATS OR 800 BYTES
             #SECOND PARAMETER = ORDER OF BYTES. BASICALLY 'f' MULTIPLIED BY TWICE BUFFER SIZE
             #DONT CHANGE THE 3rd PARAM
-            self.serPort.startSerialListen(800, 'f' * 200, self.__serial_callback) #BYTES TYPE CALLBACK CHANGE
+            self.serPort.startSerialListen(200, 'f' * 50, self.__serial_callback) #BYTES TYPE CALLBACK CHANGE
             self.__live_feed_serial()
 
     #Get live feed from the serial port
@@ -82,7 +82,7 @@ class Egram_Window(Frame):
 
         #CHANGE THE FIRST PARAMETER TO MODIFY THE REFRESH RATE
         #FOR EXAMPLE, IF IT IS 200, THERE IS A 200ms DELAY BETWEEN REFRESHES
-        self.cont_id = self.master.after(200, self.__live_feed_serial)
+        self.cont_id = self.master.after(500, self.__live_feed_serial)
 
 
 
@@ -99,7 +99,7 @@ class Egram_Window(Frame):
         else:
             #DOES CHANGE, DEPENDING ON BUFFER SIZE FOR EACH INPUT
             #0.5 IS SUBTRACTED TO 'ZERO' THE READING
-            bSize = 100
+            bSize = 25
             for i in range(bSize):
                 self.vData.get()  # Pop oldest entry from the queue
                 self.vData.put(data[i] - 0.5)  # Put in the new data

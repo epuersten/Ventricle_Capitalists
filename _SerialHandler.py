@@ -38,20 +38,26 @@ class serialReadThread(threading.Thread):
         # first try to read in the data. Read as many bytes as were specified
         # +1 represents the newline terminator
         # if True:
-        while (len(dataIn) < self.numInputs + 1):
-            try:
-                # dataIn = self.port.read(self.numInputs)
-                dataIn += (self.port.read())
-                if(dataIn[-1] == 10):
-                    break
-                # RETURN NONE IF THE SERIAL BREAKS
-            except serial.SerialException:
-                self.callback(None)
-                return
+        #while (len(dataIn) < self.numInputs + 1):
+        #    try:
+        #        # dataIn = self.port.read(self.numInputs)
+        #        dataIn += (self.port.read())
+        #        if(dataIn[-1] == 10):
+        #            break
+        #        # RETURN NONE IF THE SERIAL BREAKS
+        #    except serial.SerialException:
+        #        self.callback(None)
+        #        return
         # dataIn = self.port.read(self.numInputs)
         #print(dataIn)
 
-        if(len(dataIn) - 1 < self.numInputs):
+        try:
+            dataIn = self.port.read_until(size=self.numInputs)
+        except serial.SerialException:
+            self.callback(None)
+            return
+
+        if(len(dataIn)  < self.numInputs):
             print("SKIPPING")
             return
 
@@ -72,7 +78,7 @@ class serialReadThread(threading.Thread):
             if (self.callback == None):
                 print(output)
             else:
-                #print(output)
+                print(output)
                 self.callback(output)
         except:
             print("Improper layout/number of bytes provided!")
@@ -81,7 +87,7 @@ class SerialHandler:
 
     #Constructor that creates the COM port with a specified address
     def __init__(self, comport):
-        self.port = serial.Serial(comport, 19200, timeout=2)         #Serial port to do comms on
+        self.port = serial.Serial(comport, 115200, timeout=2)         #Serial port to do comms on
         self.serialThread = None #Thread declaration for later...
         self.polling = False
 
