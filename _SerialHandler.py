@@ -44,12 +44,12 @@ class serialReadThread(threading.Thread):
                 dataIn += (self.port.read())
                 if(dataIn[-1] == 10):
                     break
-            # RETURN NONE IF THE SERIAL BREAKS
+                # RETURN NONE IF THE SERIAL BREAKS
             except serial.SerialException:
                 self.callback(None)
                 return
         # dataIn = self.port.read(self.numInputs)
-        print(dataIn)
+        #print(dataIn)
 
         if(len(dataIn) - 1 < self.numInputs):
             print("SKIPPING")
@@ -72,6 +72,7 @@ class serialReadThread(threading.Thread):
             if (self.callback == None):
                 print(output)
             else:
+                #print(output)
                 self.callback(output)
         except:
             print("Improper layout/number of bytes provided!")
@@ -80,7 +81,7 @@ class SerialHandler:
 
     #Constructor that creates the COM port with a specified address
     def __init__(self, comport):
-        self.port = serial.Serial(comport, 19200, timeout=1)         #Serial port to do comms on
+        self.port = serial.Serial(comport, 19200, timeout=2)         #Serial port to do comms on
         self.serialThread = None #Thread declaration for later...
         self.polling = False
 

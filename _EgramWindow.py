@@ -45,11 +45,12 @@ class Egram_Window(Frame):
 
 
         #ADDED THESE TO HOLD THE INPUT DATA
-        self.vData = Queue(100) #Data queue with max size of 20 for storing ECG input. Ventricle sensor data
-        self.aData = Queue(100) #Atrial sensor data
+        #THE ARGUMENT IS HOW MANY TOTAL DATA POINTS THE QUEUE WILL HOLD
+        self.vData = Queue(1000) #Data queue with max size of 20 for storing ECG input. Ventricle sensor data
+        self.aData = Queue(1000) #Atrial sensor data
 
         #Fill the queue with empty data at first
-        for i in range(100):
+        for i in range(1000):
             self.vData.put(0)
             self.aData.put(0)
 
@@ -61,7 +62,10 @@ class Egram_Window(Frame):
             self.serPort.stopSerialListen()
         else:
             self.liveFeed = True
-            self.serPort.startSerialListen(8, 'ff', self.__serial_callback)
+            #FIRST PARAMETER = NUMBER OF BYTES TO COLLECT. FOR BUFFER SIZE 100, WE RECEIVE 200 FLOATS OR 800 BYTES
+            #SECOND PARAMETER = ORDER OF BYTES. BASICALLY 'f' MULTIPLIED BY TWICE BUFFER SIZE
+            #DONT CHANGE THE 3rd PARAM
+            self.serPort.startSerialListen(800, 'f' * 200, self.__serial_callback) #BYTES TYPE CALLBACK CHANGE
             self.__live_feed_serial()
 
     #Get live feed from the serial port
@@ -69,12 +73,16 @@ class Egram_Window(Frame):
 
         if self.liveFeed:
 
+            #RANGE HERE MUST BE EQUAL TO THE NUMBER OF DATA POINTS
+            #USUALLY WE CAN LEAVE IT AT 1000 SO DONT WORRY
             self.__reset_feed()
-            self.vent.plot(range(100), self.vData.queue, marker=',', color='blue')
-            self.atr.plot(range(100), self.aData.queue, marker=',', color='blue')
+            self.vent.plot(range(1000), self.vData.queue, marker=',', color='blue')
+            self.atr.plot(range(1000), self.aData.queue, marker=',', color='blue')
             self.graph.draw()
 
-        self.cont_id = self.master.after(100, self.__live_feed_serial)
+        #CHANGE THE FIRST PARAMETER TO MODIFY THE REFRESH RATE
+        #FOR EXAMPLE, IF IT IS 200, THERE IS A 200ms DELAY BETWEEN REFRESHES
+        self.cont_id = self.master.after(200, self.__live_feed_serial)
 
 
 
@@ -89,11 +97,14 @@ class Egram_Window(Frame):
             self.serPort.stopSerialListen()
             Popup("Telemetry Error", "Board Telemetry Lost!")
         else:
-            self.vData.get()  # Pop oldest entry from the queue
-            self.vData.put(data[0])  # Put in the new data
-
-            self.aData.get()  # Ditto
-            self.aData.put(data[1])
+            #DOES CHANGE, DEPENDING ON BUFFER SIZE FOR EACH INPUT
+            #0.5 IS SUBTRACTED TO 'ZERO' THE READING
+            bSize = 100
+            for i in range(bSize):
+                self.vData.get()  # Pop oldest entry from the queue
+                self.vData.put(data[i] - 0.5)  # Put in the new data
+                self.aData.get()  # Ditto
+                self.aData.put(data[i + bSize] - 0.5)
 
 
 
@@ -104,18 +115,21 @@ class Egram_Window(Frame):
         self.master.after_cancel(self.cont_id)
         self.__reset_feed()
         self.graph.draw()
-        
+
+
+    #X_lim is the maximum number of data points that are displayed
+    #Y lim is the range of values that are displayed on the y-axis
     def __reset_feed(self):
         self.vent.cla()
         self.vent.grid()
-        self.vent.set_ylim(top=5.0,bottom=-5.0)
-        self.vent.set_xlim(right=99.0)
+        self.vent.set_ylim(top=1,bottom=-1)
+        self.vent.set_xlim(right=999.0)
         self.vent.set_xlabel("Time (s)")
         self.vent.set_ylabel("Ventricular Amplitude (V)")
         
         self.atr.cla()
         self.atr.grid()
-        self.atr.set_ylim(top=5.0,bottom=-5.0)
-        self.atr.set_xlim(right=99.0)
+        self.atr.set_ylim(top=1,bottom=-1)
+        self.atr.set_xlim(right=999.0)
         self.atr.set_xlabel("Time (s)")
         self.atr.set_ylabel("Atrial Amplitude (V)")
