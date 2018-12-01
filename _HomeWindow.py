@@ -546,12 +546,17 @@ class Home_Window(Frame):
                     self.current_params[14] = self.__encode_actThresh(self.current_params)
                     Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
                     self.serPort.sendData(self.current_params)
+                    self.serPort.startSerialListen(2, "h", self.__verify_param_callback)
                 else:
                     Popup("Serial Error", "Pacemaker not available!")
-                #Echo Code - for testing
-                #h = int16 (2 bytes), f = floating point (4 bytes)
-                #self.port.startSerialListen(26, "hhhhhhhhhff")
 
+    # Callback method to verify that data was successfully sent
+    def __verify_param_callback(self, data):
+        if(data is None or data[0] != 123):
+            Popup("Transmission Error", "Error updating pacemaker parameters!")
+        else:
+            Popup("Transmission Successful!", "Pacemaker parameters have been updated!")
+        self.serPort.stopSerialListen()
 
     def __encode_mode(self,current_params):
         modeEnum = ['OFF','VOO','AOO','VVI','AAI','DOO','DDD','VOOR','AOOR','VVIR','AAIR','DOOR','DDDR']
