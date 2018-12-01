@@ -544,6 +544,7 @@ class Home_Window(Frame):
                 if (self.__check_new_pacemaker()):
                     self.current_params[0] = self.__encode_mode(self.current_params)
                     self.current_params[14] = self.__encode_actThresh(self.current_params)
+                    print(self.current_params)
                     Popup("Parameter Transmission","Parameters are being transmitted to the Pacemaker")
                     self.serPort.sendData(self.current_params)
                     self.serPort.startSerialListen(2, "h", self.__verify_param_callback)
@@ -567,9 +568,10 @@ class Home_Window(Frame):
 
     def __encode_actThresh(self,current_params):
         actThreshEnum = ['V-Low','Low','Med-Low','Med','Med-High','High','V-High']
+        actThreshValues = [2.0,2.5,3.0,4.0,5.0,5.5,6.0]
         for i in range(len(actThreshEnum)):
             if current_params[14] == actThreshEnum[i]:
-                    actThresh = i+1
+                    actThresh = actThreshValues[i]
         return actThresh
                     
     # Method to check if the parameters have changed since the last time they were sent
