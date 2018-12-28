@@ -1,13 +1,26 @@
 # Ventricle_Capitalists
 Code repository for all project information relating to 3K04 Software Design (Pacemaker)
 
-Want to add code to the repo?
+Required python modules to run:
+matplotlib
+pySerial
 
-Create a new branch, put all the code on the branch and create a pull request!
+These can be installed by running in command prompt
+python -m pip install matplotlib
+python -m pip install pySerial
 
+BASIC SERIAL TESTING
+Basic Serial tests are run via SerialTest.py
+This requires you to also have:
+(1) _SerialHandler.py
+(2) installed pySerial
 
-NEW STUFF FOR THE DCM:
-
-We're using C# for this so you're going to be needing Visual Studio 2017. Just use the community edition from Microsoft. You shouldn't need any of the
-addons aside from the C# package. After it's installed, you can just go ahead and open up the .sln in the PacemakerClient folder, which will get you
-what I've gotten done thus far
+DCM TESTING:
+DCM test are run via DCMLaunch.py
+This requires you to also have:
+(1) _SerialHandler.py
+(2) _PopupWindow.py
+(3) _EgramWindow.py
+(4) _LoginWindow.py
+(5) _HomeWindow.py
+(6) installed pySerial and installed matplotlib
